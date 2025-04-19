@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { headers } from "next/headers";
+import Image from "next/image";
 
 export const runtime = "edge";
 
@@ -9,14 +9,6 @@ export async function GET(request: Request) {
   const contributed = searchParams.get("contributed");
 
   try {
-    // Load the logo and helper images
-    const logoData = await fetch(
-      new URL("../../../../public/logo.png", import.meta.url)
-    ).then((res) => res.arrayBuffer());
-    const helperData = await fetch(
-      new URL("../../../../public/helper.png", import.meta.url)
-    ).then((res) => res.arrayBuffer());
-
     const response = new ImageResponse(
       (
         <div
@@ -38,15 +30,15 @@ export async function GET(request: Request) {
               marginBottom: "20px",
             }}
           >
-            <img
-              src={helperData as unknown as string}
+            <Image
+              src={`${process.env.NEXT_PUBLIC_APP_URL}/helper.png`}
               alt="Helper Icon"
               width={80}
               height={80}
               style={{ marginRight: "20px" }}
             />
-            <img
-              src={logoData as unknown as string}
+            <Image
+              src={`${process.env.NEXT_PUBLIC_APP_URL}/logo.png`}
               alt="H3LP3R Logo"
               width={200}
               height={60}

@@ -60,7 +60,7 @@ export default function CreatePage() {
 
       const h3lpAddress = await createCampaign(
         ethers.constants.AddressZero, // Using ETH only
-        ethers.utils.parseEther(ethAmount.toString()),
+        ethers.utils.parseEther(ethAmount.toString()).toString(),
         signer
       );
 

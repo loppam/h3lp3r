@@ -2,12 +2,12 @@
   "frame": {
     "version": "1",
     "name": "H3LP3R",
-    "iconUrl": "/helper.png",
-    "homeUrl": "/",
-    "imageUrl": "/api/frame/image",
+    "iconUrl": "${process.env.NEXT_PUBLIC_APP_URL}/helper.png",
+    "homeUrl": "${process.env.NEXT_PUBLIC_APP_URL}",
+    "imageUrl": "${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image",
     "buttonTitle": "H3LP",
-    "splashImageUrl": "/helper.png",
+    "splashImageUrl": "${process.env.NEXT_PUBLIC_APP_URL}/helper.png",
     "splashBackgroundColor": "#ffffff",
-    "webhookUrl": "/api/frame"
+    "webhookUrl": "${process.env.NEXT_PUBLIC_APP_URL}/api/frame"
   }
 }

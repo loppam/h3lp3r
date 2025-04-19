@@ -28,6 +28,7 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { address } = useAccount();
+  const [searchQueryState, setSearchQuery] = useState(searchQuery);
 
   useEffect(() => {
     async function fetchCampaigns() {
@@ -48,18 +49,22 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   }, []);
 
   useEffect(() => {
-    if (searchQuery) {
+    if (searchQueryState) {
       const filtered = campaigns.filter(
         (campaign) =>
-          campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
+          campaign.title
+            .toLowerCase()
+            .includes(searchQueryState.toLowerCase()) ||
+          campaign.description
+            .toLowerCase()
+            .includes(searchQueryState.toLowerCase())
       );
       setFilteredCampaigns(filtered);
       setCurrentPage(1);
     } else {
       setFilteredCampaigns(campaigns);
     }
-  }, [searchQuery, campaigns]);
+  }, [searchQueryState, campaigns]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -95,11 +100,8 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
       <div className="flex gap-4">
         <Input
           placeholder="Search by campaign title or description"
-          value={searchQuery}
-          onChange={(e) => {
-            // Assuming you want to update the searchQuery state
-            // This is a placeholder and should be replaced with actual logic
-          }}
+          value={searchQueryState}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
       </div>

@@ -146,11 +146,12 @@ export async function getCampaignByCode(
     return {
       address: campaign.campaign,
       creator: campaign.creator,
+      title: campaign.title,
+      description: campaign.description,
       goal: campaign.goal.toString(),
       raised: campaign.raised.toString(),
       tokenAddress: campaign.tokenAddress,
       isActive: campaign.isActive,
-      code: campaign.code,
     };
   } catch (err) {
     console.error("Error fetching campaign:", err);

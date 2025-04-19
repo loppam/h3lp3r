@@ -20,7 +20,9 @@ export const metadata: Metadata = {
     "fc:frame:button:1": frameConfig.buttons[0].label,
     "fc:frame:button:2": frameConfig.buttons[1].label,
     "fc:frame:post_url": frameConfig.postUrl,
-    "fc:frame:input:text": frameConfig.input?.text,
+    ...(frameConfig.input?.text && {
+      "fc:frame:input:text": frameConfig.input.text,
+    }),
   },
 };
 

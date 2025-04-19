@@ -1,18 +1,12 @@
 "use client";
 
-import { WagmiConfig, createConfig, http } from "wagmi";
-import { base } from "wagmi/chains";
-import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
+import { config } from "@/lib/wagmi";
 import { useEffect } from "react";
 import { sdk } from "@farcaster/frame-sdk";
 
-const config = createConfig({
-  chains: [base],
-  transports: {
-    [base.id]: http(),
-  },
-  connectors: [farcasterFrame()],
-});
+const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -23,5 +17,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // sdk.actions.ready({ disableNativeGestures: true });
   }, []);
 
-  return <WagmiConfig config={config}>{children}</WagmiConfig>;
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
+  );
 }

@@ -3,86 +3,24 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { Button } from "@/components/ui/Button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
 import { useState, useEffect } from "react";
-import { createCampaign, getCampaignByCode } from "@/lib/contracts";
-import { ethers } from "ethers";
 import { CampaignList } from "@/components/CampaignList";
 import { sdk } from "@farcaster/frame-sdk";
+import { getCampaignByCode } from "@/lib/contracts";
 
 export default function App() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
-
-  const [campaignTitle, setCampaignTitle] = useState("");
-  const [campaignDescription, setCampaignDescription] = useState("");
-  const [campaignGoal, setCampaignGoal] = useState("");
-  const [tokenAddress, setTokenAddress] = useState(
-    ethers.constants.AddressZero
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCode, setSearchCode] = useState("");
   const [frameState, setFrameState] = useState<"help" | "get-help">("help");
 
   useEffect(() => {
-    // Hide the splash screen when the app is ready
     sdk.actions.ready();
   }, []);
-
-  const handleCreateCampaign = async () => {
-    if (!isConnected) {
-      connect({ connector: injected() });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      setSuccess(null);
-
-      if (!window.ethereum) {
-        throw new Error("No Ethereum provider found");
-      }
-
-      const provider = new ethers.providers.Web3Provider(
-        window.ethereum as ethers.providers.ExternalProvider
-      );
-      const signer = provider.getSigner();
-
-      const campaignAddress = await createCampaign(
-        tokenAddress,
-        campaignGoal,
-        signer
-      );
-
-      if (campaignAddress) {
-        setSuccess(`Campaign created successfully at ${campaignAddress}`);
-        // Reset form
-        setCampaignTitle("");
-        setCampaignDescription("");
-        setCampaignGoal("");
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create campaign"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSearchByCode = async () => {
     if (searchCode.length !== 4) {
@@ -96,7 +34,7 @@ export default function App() {
       } else {
         alert("No H3LP found with this code");
       }
-    } catch (error) {
+    } catch {
       alert("Error searching for H3LP");
     }
   };
@@ -110,10 +48,12 @@ export default function App() {
             {address && (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <img
+                  <Image
                     src={`https://warpcast.com/${address}.png`}
                     alt="Profile"
-                    className="w-8 h-8 rounded-full"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
                   />
                   <div className="text-sm text-gray-600">
                     {address.slice(0, 6)}...{address.slice(-4)}
@@ -143,13 +83,13 @@ export default function App() {
                     variant={frameState === "help" ? "default" : "outline"}
                     onClick={() => setFrameState("help")}
                   >
-                    Help Others
+                    H3LP
                   </Button>
                   <Button
                     variant={frameState === "get-help" ? "default" : "outline"}
                     onClick={() => setFrameState("get-help")}
                   >
-                    Get Help
+                    GET H3LP
                   </Button>
                 </div>
                 <Button onClick={() => (window.location.href = "/create")}>

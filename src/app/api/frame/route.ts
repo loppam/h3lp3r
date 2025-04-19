@@ -1,7 +1,32 @@
 import { NextResponse } from "next/server";
 import { getCampaignByCode } from "@/lib/contracts";
 import { frameConfig } from "../../frame";
-import { sdk } from "@farcaster/frame-sdk";
+
+// Function to send Farcaster notification
+async function sendFarcasterNotification(
+  recipientFid: string,
+  title: string,
+  body: string,
+  url: string
+) {
+  const response = await fetch("https://api.farcaster.xyz/v2/notifications", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.FARCASTER_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      recipientFid,
+      title,
+      body,
+      url,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to send notification");
+  }
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -41,6 +66,18 @@ export async function GET(request: Request) {
         contributionAmount = customAmount;
       } else if (amount) {
         contributionAmount = amount;
+      }
+
+      // Send notification to campaign creator
+      try {
+        await sendFarcasterNotification(
+          campaign.creator,
+          "New Contribution! 🎉",
+          `Someone contributed $${contributionAmount} to your campaign "${campaign.title}"`,
+          `/campaign/${code}`
+        );
+      } catch (error) {
+        console.error("Failed to send contribution notification:", error);
       }
 
       return NextResponse.json({
@@ -115,18 +152,22 @@ export async function POST(req: Request) {
       try {
         const campaign = await getCampaignByCode(inputText);
         if (campaign) {
-          // Send notification to campaign creator
-          await sdk.actions.sendNotification({
-            recipientFid: fid,
-            title: "New H3LP Request",
-            body: `Someone wants to help with campaign ${inputText}`,
-            url: `/campaign/${campaign.address}`,
-          });
-
+          // Return frame with campaign details
           return NextResponse.json({
-            type: "frame",
-            frameUrl: `${process.env.NEXT_PUBLIC_APP_URL}/campaign/${campaign.address}`,
-            buttons: frameConfig.buttons,
+            name: `Campaign #${inputText}`,
+            description: `Campaign found: ${campaign.title}`,
+            image: `${
+              process.env.NEXT_PUBLIC_HOST
+            }/api/image?text=${encodeURIComponent(
+              `Campaign found: ${campaign.title}`
+            )}`,
+            buttons: [
+              {
+                label: "View Campaign",
+                action: "link",
+                target: `${process.env.NEXT_PUBLIC_HOST}/campaign/${campaign.address}`,
+              },
+            ],
           });
         }
       } catch (error) {
