@@ -5,20 +5,20 @@ const appUrl = process.env.NEXT_PUBLIC_URL;
 
 const frame = {
   version: "next",
-  imageUrl: `${appUrl}/images/helper.png`,
+  imageUrl: `https://h3lp3r.vercel.app/images/helper.png`,
   buttons: [
     {
       title: "Create Campaign",
       action: {
         type: "post",
-        target: `${appUrl}/api/frames/create`,
+        target: `https://h3lp3r.vercel.app/api/frames/create`,
       },
     },
     {
       title: "View Campaigns",
       action: {
         type: "post",
-        target: `${appUrl}/api/frames/campaigns`,
+        target: `https://h3lp3r.vercel.app/api/frames/campaigns`,
       },
     },
   ],
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "A decentralized crowdfunding platform on Farcaster",
       images: [
         {
-          url: `${appUrl}/images/helper.png`,
+          url: `https://h3lp3r.vercel.app/images/helper.png`,
           width: 1200,
           height: 630,
           alt: "H3LP3R Logo",
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
     icons: {
-      icon: `${appUrl}/images/logo.png`,
+      icon: `https://h3lp3r.vercel.app/images/logo.png`,
     },
     other: {
       "fc:frame": JSON.stringify(frame),
