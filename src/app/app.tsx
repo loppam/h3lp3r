@@ -4,10 +4,12 @@ import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
 import { config } from "@/lib/wagmi";
+import { base } from "wagmi/chains";
+import { sdk } from "@farcaster/frame-sdk";
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -15,6 +17,19 @@ export default function App() {
   const { disconnect } = useDisconnect();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCode, setSearchCode] = useState("");
+  const [context, setContext] = useState<any>(null);
+
+  useEffect(() => {
+    const loadContext = async () => {
+      try {
+        const frameContext = await sdk.context;
+        setContext(frameContext);
+      } catch (error) {
+        console.error("Error loading frame context:", error);
+      }
+    };
+    loadContext();
+  }, []);
 
   const handleSearchByCode = async () => {
     if (searchCode.length !== 4) {
@@ -32,6 +47,9 @@ export default function App() {
       alert("Error searching for H3LP");
     }
   };
+
+  // If we're in a frame context, we should already be connected
+  const shouldShowConnectButton = !context?.client?.isFrame;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -53,9 +71,11 @@ export default function App() {
                     {address.slice(0, 6)}...{address.slice(-4)}
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => disconnect()}>
-                  Disconnect
-                </Button>
+                {shouldShowConnectButton && (
+                  <Button variant="outline" onClick={() => disconnect()}>
+                    Disconnect
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -63,10 +83,15 @@ export default function App() {
       </header>
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {!isConnected ? (
+          {!isConnected && shouldShowConnectButton ? (
             <div className="flex justify-center">
               <Button
-                onClick={() => connect({ connector: config.connectors[0] })}
+                onClick={() =>
+                  connect({
+                    chainId: base.id,
+                    connector: config.connectors[0],
+                  })
+                }
               >
                 Connect Wallet
               </Button>
