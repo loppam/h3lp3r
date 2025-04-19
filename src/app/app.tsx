@@ -1,14 +1,13 @@
 "use client";
 
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CampaignList } from "@/components/CampaignList";
-import { sdk } from "@farcaster/frame-sdk";
 import { getCampaignByCode } from "@/lib/contracts";
+import { config } from "@/lib/wagmi";
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -16,10 +15,6 @@ export default function App() {
   const { disconnect } = useDisconnect();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCode, setSearchCode] = useState("");
-
-  useEffect(() => {
-    sdk.actions.ready();
-  }, []);
 
   const handleSearchByCode = async () => {
     if (searchCode.length !== 4) {
@@ -70,7 +65,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           {!isConnected ? (
             <div className="flex justify-center">
-              <Button onClick={() => connect({ connector: injected() })}>
+              <Button
+                onClick={() => connect({ connector: config.connectors[0] })}
+              >
                 Connect Wallet
               </Button>
             </div>
