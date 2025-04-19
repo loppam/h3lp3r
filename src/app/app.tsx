@@ -79,12 +79,26 @@ export default function App() {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Campaign Manager</h1>
-          {address && (
-            <p className="mt-2 text-sm text-gray-600">
-              Connected wallet: {address.slice(0, 6)}...{address.slice(-4)}
-            </p>
-          )}
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">H3LP3R</h1>
+            {address && (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <img
+                    src={`https://warpcast.com/${address}.png`}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="text-sm text-gray-600">
+                    {address.slice(0, 6)}...{address.slice(-4)}
+                  </div>
+                </div>
+                <Button variant="outline" onClick={() => disconnect()}>
+                  Disconnect
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
       <main>
@@ -97,83 +111,16 @@ export default function App() {
             </div>
           ) : (
             <div className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Campaign</CardTitle>
-                  <CardDescription>
-                    Start a new crowdfunding campaign
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Campaign Title</Label>
-                      <Input
-                        id="title"
-                        value={campaignTitle}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCampaignTitle(e.target.value)
-                        }
-                        placeholder="Enter campaign title"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={campaignDescription}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                          setCampaignDescription(e.target.value)
-                        }
-                        placeholder="Enter campaign description"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="goal">Goal Amount (ETH)</Label>
-                      <Input
-                        id="goal"
-                        type="number"
-                        value={campaignGoal}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setCampaignGoal(e.target.value)
-                        }
-                        placeholder="Enter goal amount in ETH"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="token">Token Address (Optional)</Label>
-                      <Input
-                        id="token"
-                        value={tokenAddress}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setTokenAddress(e.target.value)
-                        }
-                        placeholder="Enter token address (0x...) or leave empty for ETH"
-                      />
-                    </div>
-                    {error && (
-                      <div className="text-red-500 text-sm">{error}</div>
-                    )}
-                    {success && (
-                      <div className="text-green-500 text-sm">{success}</div>
-                    )}
-                    <Button onClick={handleCreateCampaign} disabled={isLoading}>
-                      {isLoading ? "Creating..." : "Create Campaign"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">Active Campaigns</h2>
-                <CampaignList />
-              </div>
-
-              <div className="flex justify-center">
-                <Button variant="outline" onClick={() => disconnect()}>
-                  Disconnect Wallet
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Active H3LPs</h2>
+                <Button onClick={() => (window.location.href = "/create")}>
+                  Create H3LP
                 </Button>
               </div>
+              <div className="mb-4">
+                <Input placeholder="Search H3LPs..." className="w-full" />
+              </div>
+              <CampaignList />
             </div>
           )}
         </div>
