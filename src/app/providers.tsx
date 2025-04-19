@@ -10,11 +10,11 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Hide splash screen when app is ready
-    sdk.actions.ready();
-
-    // Disable native gestures if needed
-    // sdk.actions.ready({ disableNativeGestures: true });
+    // Initialize the frame SDK
+    sdk.actions.ready({
+      disableNativeGestures: true,
+      frameUrl: "https://h3lp3r.vercel.app",
+    });
   }, []);
 
   return (

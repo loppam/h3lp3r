@@ -2,12 +2,13 @@
   "frame": {
     "version": "1",
     "name": "H3LP3R",
-    "iconUrl": "${process.env.NEXT_PUBLIC_APP_URL}/helper.png",
-    "homeUrl": "${process.env.NEXT_PUBLIC_APP_URL}",
-    "imageUrl": "${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image",
+    "iconUrl": "/icon.png",
+    "homeUrl": "https://h3lp3r.vercel.app",
+    "imageUrl": "/api/frame/image",
     "buttonTitle": "H3LP",
-    "splashImageUrl": "${process.env.NEXT_PUBLIC_APP_URL}/helper.png",
+    "splashImageUrl": "/splash.png",
     "splashBackgroundColor": "#ffffff",
-    "webhookUrl": "${process.env.NEXT_PUBLIC_APP_URL}/api/frame"
+    "webhookUrl": "/api/frame",
+    "authorizedDomains": ["h3lp3r.vercel.app"]
   }
 }
