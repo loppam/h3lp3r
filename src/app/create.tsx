@@ -13,9 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createCampaign } from "@/lib/contracts";
 import { ethers } from "ethers";
+import { sdk } from "@farcaster/frame-sdk";
 
 export default function CreatePage() {
   const { isConnected } = useAccount();
@@ -27,6 +28,11 @@ export default function CreatePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Hide the splash screen when the app is ready
+    sdk.actions.ready();
+  }, []);
 
   const handleCreateH3LP = async () => {
     if (!isConnected) {

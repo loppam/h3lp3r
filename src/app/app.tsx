@@ -13,10 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { createCampaign } from "@/lib/contracts";
+import { useState, useEffect } from "react";
+import { createCampaign, getCampaignByCode } from "@/lib/contracts";
 import { ethers } from "ethers";
 import { CampaignList } from "@/components/CampaignList";
+import { sdk } from "@farcaster/frame-sdk";
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -32,6 +33,14 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchCode, setSearchCode] = useState("");
+  const [frameState, setFrameState] = useState<"help" | "get-help">("help");
+
+  useEffect(() => {
+    // Hide the splash screen when the app is ready
+    sdk.actions.ready();
+  }, []);
 
   const handleCreateCampaign = async () => {
     if (!isConnected) {
@@ -75,6 +84,23 @@ export default function App() {
     }
   };
 
+  const handleSearchByCode = async () => {
+    if (searchCode.length !== 4) {
+      alert("Please enter a valid 4-character code");
+      return;
+    }
+    try {
+      const campaign = await getCampaignByCode(searchCode);
+      if (campaign) {
+        window.location.href = `/campaign/${campaign.address}`;
+      } else {
+        alert("No H3LP found with this code");
+      }
+    } catch (error) {
+      alert("Error searching for H3LP");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
@@ -112,15 +138,47 @@ export default function App() {
           ) : (
             <div className="space-y-8">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Active H3LPs</h2>
+                <div className="flex space-x-4">
+                  <Button
+                    variant={frameState === "help" ? "default" : "outline"}
+                    onClick={() => setFrameState("help")}
+                  >
+                    Help Others
+                  </Button>
+                  <Button
+                    variant={frameState === "get-help" ? "default" : "outline"}
+                    onClick={() => setFrameState("get-help")}
+                  >
+                    Get Help
+                  </Button>
+                </div>
                 <Button onClick={() => (window.location.href = "/create")}>
                   Create H3LP
                 </Button>
               </div>
-              <div className="mb-4">
-                <Input placeholder="Search H3LPs..." className="w-full" />
+
+              <div className="flex gap-4">
+                <Input
+                  placeholder="Search H3LPs..."
+                  className="flex-1"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter H3LP code (4 chars)"
+                    className="w-40"
+                    value={searchCode}
+                    onChange={(e) =>
+                      setSearchCode(e.target.value.toUpperCase())
+                    }
+                    maxLength={4}
+                  />
+                  <Button onClick={handleSearchByCode}>Search</Button>
+                </div>
               </div>
-              <CampaignList />
+
+              <CampaignList searchQuery={searchQuery} />
             </div>
           )}
         </div>

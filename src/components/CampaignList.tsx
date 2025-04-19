@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -15,12 +17,15 @@ import { Progress } from "@/components/ui/progress";
 
 const ITEMS_PER_PAGE = 9;
 
-export function CampaignList() {
+interface CampaignListProps {
+  searchQuery: string;
+}
+
+export function CampaignList({ searchQuery }: CampaignListProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchCode, setSearchCode] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const { address } = useAccount();
 
@@ -43,16 +48,18 @@ export function CampaignList() {
   }, []);
 
   useEffect(() => {
-    if (searchCode) {
-      const filtered = campaigns.filter((campaign) =>
-        campaign.address.toLowerCase().includes(searchCode.toLowerCase())
+    if (searchQuery) {
+      const filtered = campaigns.filter(
+        (campaign) =>
+          campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredCampaigns(filtered);
       setCurrentPage(1);
     } else {
       setFilteredCampaigns(campaigns);
     }
-  }, [searchCode, campaigns]);
+  }, [searchQuery, campaigns]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -87,9 +94,12 @@ export function CampaignList() {
     <div className="space-y-6">
       <div className="flex gap-4">
         <Input
-          placeholder="Search by campaign address (e.g., 0x...)"
-          value={searchCode}
-          onChange={(e) => setSearchCode(e.target.value)}
+          placeholder="Search by campaign title or description"
+          value={searchQuery}
+          onChange={(e) => {
+            // Assuming you want to update the searchQuery state
+            // This is a placeholder and should be replaced with actual logic
+          }}
           className="max-w-sm"
         />
       </div>
@@ -98,14 +108,8 @@ export function CampaignList() {
         {currentCampaigns.map((campaign) => (
           <Card key={campaign.address} className="flex flex-col">
             <CardHeader>
-              <CardTitle>
-                Campaign #{campaign.address.slice(0, 6)}...
-                {campaign.address.slice(-4)}
-              </CardTitle>
-              <CardDescription>
-                Created by: {campaign.creator.slice(0, 6)}...
-                {campaign.creator.slice(-4)}
-              </CardDescription>
+              <CardTitle>{campaign.title}</CardTitle>
+              <CardDescription>{campaign.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
               <div className="space-y-2">

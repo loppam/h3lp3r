@@ -2,12 +2,26 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Providers } from "@/app/providers";
+import { frameConfig } from "./frame";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "H3lp3r",
-  description: "A decentralized crowdfunding platform",
+  title: "H3LP3R",
+  description: frameConfig.description,
+  openGraph: {
+    title: frameConfig.name,
+    description: frameConfig.description,
+    images: [frameConfig.image],
+  },
+  other: {
+    "fc:frame": "vNext",
+    "fc:frame:image": frameConfig.image,
+    "fc:frame:button:1": frameConfig.buttons[0].label,
+    "fc:frame:button:2": frameConfig.buttons[1].label,
+    "fc:frame:post_url": frameConfig.postUrl,
+    "fc:frame:input:text": frameConfig.input?.text,
+  },
 };
 
 export default function RootLayout({

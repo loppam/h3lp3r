@@ -48,11 +48,12 @@ const CAMPAIGN_FACTORY_ADDRESS =
 export interface Campaign {
   address: string;
   creator: string;
+  title: string;
+  description: string;
   goal: string;
   raised: string;
-  tokenAddress: string;
   isActive: boolean;
-  code: string;
+  tokenAddress: string;
 }
 
 interface RawCampaign {

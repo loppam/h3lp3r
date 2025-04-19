@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCampaignByCode } from "@/lib/contracts";
+import { frameConfig } from "../../frame";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -92,4 +93,46 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { buttonIndex, inputText } = body;
+
+  // Handle different button actions
+  if (buttonIndex === 1) {
+    // H3LP button clicked
+    if (inputText) {
+      try {
+        const campaign = await getCampaignByCode(inputText);
+        if (campaign) {
+          return NextResponse.json({
+            type: "frame",
+            frameUrl: `${process.env.NEXT_PUBLIC_APP_URL}/campaign/${campaign.address}`,
+            buttons: frameConfig.buttons,
+          });
+        }
+      } catch (error) {
+        console.error("Error finding campaign:", error);
+      }
+    }
+    return NextResponse.json({
+      type: "frame",
+      frameUrl: `${process.env.NEXT_PUBLIC_APP_URL}/help`,
+      buttons: frameConfig.buttons,
+    });
+  } else if (buttonIndex === 2) {
+    // GET H3LP button clicked
+    return NextResponse.json({
+      type: "frame",
+      frameUrl: `${process.env.NEXT_PUBLIC_APP_URL}/get-help`,
+      buttons: frameConfig.buttons,
+    });
+  }
+
+  return NextResponse.json({
+    type: "frame",
+    frameUrl: process.env.NEXT_PUBLIC_APP_URL,
+    buttons: frameConfig.buttons,
+  });
 }
