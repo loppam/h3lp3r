@@ -5,27 +5,44 @@ const appUrl = process.env.NEXT_PUBLIC_URL;
 
 const frame = {
   version: "next",
-  imageUrl: `${appUrl}/opengraph-image`,
-  button: {
-    title: "Launch Frame",
-    action: {
-      type: "launch_frame",
-      name: "Farcaster Frames v2 Demo",
-      url: appUrl,
-      splashImageUrl: `${appUrl}/splash.png`,
-      splashBackgroundColor: "#f7f7f7",
+  imageUrl: `${appUrl}/images/helper.png`,
+  buttons: [
+    {
+      title: "Create Campaign",
+      action: {
+        type: "post",
+        target: `${appUrl}/api/frames/create`,
+      },
     },
-  },
+    {
+      title: "View Campaigns",
+      action: {
+        type: "post",
+        target: `${appUrl}/api/frames/campaigns`,
+      },
+    },
+  ],
 };
 
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Farcaster Frames v2 Demo",
+    title: "H3LP3R - Decentralized Crowdfunding",
     openGraph: {
-      title: "Farcaster Frames v2 Demo",
-      description: "A Farcaster Frames v2 demo app.",
+      title: "H3LP3R - Decentralized Crowdfunding",
+      description: "A decentralized crowdfunding platform on Farcaster",
+      images: [
+        {
+          url: `${appUrl}/images/helper.png`,
+          width: 1200,
+          height: 630,
+          alt: "H3LP3R Logo",
+        },
+      ],
+    },
+    icons: {
+      icon: `${appUrl}/images/logo.png`,
     },
     other: {
       "fc:frame": JSON.stringify(frame),
@@ -34,5 +51,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Home() {
-  return (<App />);
+  return <App />;
 }
