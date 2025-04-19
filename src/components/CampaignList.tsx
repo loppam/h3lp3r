@@ -97,15 +97,6 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-4">
-        <Input
-          placeholder="Search by campaign title or description"
-          value={searchQueryState}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentCampaigns.map((campaign) => (
           <Card key={campaign.address} className="flex flex-col">

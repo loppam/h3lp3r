@@ -115,16 +115,32 @@ export async function getCampaigns(): Promise<Campaign[]> {
     provider
   );
 
-  const campaigns = await factory.getCampaigns();
-  return campaigns.map((campaign: RawCampaign) => ({
-    address: campaign.campaign,
-    creator: campaign.creator,
-    goal: campaign.goal.toString(),
-    raised: campaign.raised.toString(),
-    tokenAddress: campaign.tokenAddress,
-    isActive: campaign.isActive,
-    code: campaign.code,
-  }));
+  const campaignAddresses = await factory.getAllCampaigns();
+
+  // Get details for each campaign
+  const campaigns = await Promise.all(
+    campaignAddresses.map(async (address: string) => {
+      const campaign = new ethers.Contract(
+        address,
+        FUND_CAMPAIGN_ABI,
+        provider
+      );
+      const [creator, tokenAddress, goal, raised, isActive] =
+        await campaign.getCampaignDetails();
+      return {
+        address,
+        creator,
+        title: "Campaign", // Default title
+        description: "Help needed", // Default description
+        goal: goal.toString(),
+        raised: raised.toString(),
+        tokenAddress,
+        isActive,
+      };
+    })
+  );
+
+  return campaigns;
 }
 
 export async function getCampaignByCode(

@@ -77,21 +77,7 @@ export default function App() {
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="flex justify-between items-center">
-                <div className="flex space-x-4">
-                  <Button
-                    variant={frameState === "help" ? "default" : "outline"}
-                    onClick={() => setFrameState("help")}
-                  >
-                    H3LP
-                  </Button>
-                  <Button
-                    variant={frameState === "get-help" ? "default" : "outline"}
-                    onClick={() => setFrameState("get-help")}
-                  >
-                    GET H3LP
-                  </Button>
-                </div>
+              <div className="flex justify-end">
                 <Button onClick={() => (window.location.href = "/create")}>
                   Create H3LP
                 </Button>
