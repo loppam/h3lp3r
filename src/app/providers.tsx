@@ -1,15 +1,27 @@
 "use client";
 
-import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { config } from "@/lib/wagmi";
+import { WagmiConfig, createConfig, http } from "wagmi";
+import { base } from "wagmi/chains";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { useEffect } from "react";
+import { sdk } from "@farcaster/frame-sdk";
 
-const queryClient = new QueryClient();
+const config = createConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+  connectors: [farcasterFrame()],
+});
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
-  );
+  useEffect(() => {
+    // Hide splash screen when app is ready
+    sdk.actions.ready();
+
+    // Disable native gestures if needed
+    // sdk.actions.ready({ disableNativeGestures: true });
+  }, []);
+
+  return <WagmiConfig config={config}>{children}</WagmiConfig>;
 }

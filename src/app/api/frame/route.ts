@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCampaignByCode } from "@/lib/contracts";
 import { frameConfig } from "../../frame";
+import { sdk } from "@farcaster/frame-sdk";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -97,7 +98,15 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { buttonIndex, inputText } = body;
+  const { buttonIndex, inputText, fid, verifiedWalletAddress } = body;
+
+  // Verify the user is authenticated
+  if (!fid || !verifiedWalletAddress) {
+    return NextResponse.json({
+      type: "error",
+      message: "Please connect your Farcaster account and wallet",
+    });
+  }
 
   // Handle different button actions
   if (buttonIndex === 1) {
@@ -106,6 +115,14 @@ export async function POST(req: Request) {
       try {
         const campaign = await getCampaignByCode(inputText);
         if (campaign) {
+          // Send notification to campaign creator
+          await sdk.actions.sendNotification({
+            recipientFid: fid,
+            title: "New H3LP Request",
+            body: `Someone wants to help with campaign ${inputText}`,
+            url: `/campaign/${campaign.address}`,
+          });
+
           return NextResponse.json({
             type: "frame",
             frameUrl: `${process.env.NEXT_PUBLIC_APP_URL}/campaign/${campaign.address}`,

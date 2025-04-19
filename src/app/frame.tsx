@@ -3,7 +3,7 @@ import { FrameConfig } from "@farcaster/frame-sdk";
 export const frameConfig: FrameConfig = {
   name: "H3LP3R",
   description: "Help others or get help through decentralized crowdfunding",
-  image: "/preview.png",
+  image: "/api/frame/image",
   buttons: [
     {
       label: "H3LP",
