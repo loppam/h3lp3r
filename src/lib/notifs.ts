@@ -2,7 +2,7 @@ import {
   SendNotificationRequest,
   sendNotificationResponseSchema,
 } from "@farcaster/frame-sdk";
-import { getUserNotificationDetails } from "~/lib/kv";
+import { getUserNotificationDetails } from "@/lib/kv";
 
 const appUrl = process.env.NEXT_PUBLIC_URL || "";
 
@@ -14,6 +14,14 @@ type SendFrameNotificationResult =
   | { state: "no_token" }
   | { state: "rate_limit" }
   | { state: "success" };
+
+interface FrameNotification {
+  fid: number;
+  title: string;
+  message: string;
+  icon?: string;
+  url?: string;
+}
 
 export async function sendFrameNotification({
   fid,
@@ -62,4 +70,26 @@ export async function sendFrameNotification({
     // Error response
     return { state: "error", error: responseJson };
   }
+}
+
+export async function sendNotification({
+  fid,
+  title,
+  message,
+}: {
+  fid: number;
+  title: string;
+  message: string;
+}) {
+  const notification: FrameNotification = {
+    fid,
+    title,
+    message,
+    icon: "https://h3lp3r.vercel.app/icon.png",
+    url: "https://h3lp3r.vercel.app",
+  };
+
+  // In a real implementation, you would send this to your notification service
+  console.log("Sending notification:", notification);
+  return { success: true };
 }

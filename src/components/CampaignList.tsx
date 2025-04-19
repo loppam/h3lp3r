@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
-import { Campaign, getCampaigns, getCampaignByCode } from "@/lib/contracts";
+import { Campaign, getCampaigns } from "@/lib/contracts";
 import { Progress } from "@/components/ui/progress";
 
 const ITEMS_PER_PAGE = 9;
@@ -25,13 +25,11 @@ export function CampaignList() {
   const { address } = useAccount();
 
   useEffect(() => {
-    const fetchCampaigns = async () => {
+    async function fetchCampaigns() {
       try {
-        setIsLoading(true);
-        setError(null);
-        const campaigns = await getCampaigns();
-        setCampaigns(campaigns);
-        setFilteredCampaigns(campaigns);
+        const fetchedCampaigns = await getCampaigns();
+        setCampaigns(fetchedCampaigns);
+        setFilteredCampaigns(fetchedCampaigns);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to fetch campaigns"
@@ -39,7 +37,7 @@ export function CampaignList() {
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
     fetchCampaigns();
   }, []);
@@ -47,7 +45,7 @@ export function CampaignList() {
   useEffect(() => {
     if (searchCode) {
       const filtered = campaigns.filter((campaign) =>
-        campaign.code.toLowerCase().includes(searchCode.toLowerCase())
+        campaign.address.toLowerCase().includes(searchCode.toLowerCase())
       );
       setFilteredCampaigns(filtered);
       setCurrentPage(1);
@@ -77,101 +75,105 @@ export function CampaignList() {
     );
   }
 
+  if (campaigns.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <p>No campaigns found. Create one to get started!</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex gap-4">
         <Input
-          placeholder="Search by campaign code (e.g., A1B2)"
+          placeholder="Search by campaign address (e.g., 0x...)"
           value={searchCode}
           onChange={(e) => setSearchCode(e.target.value)}
           className="max-w-sm"
         />
       </div>
 
-      {currentCampaigns.length === 0 ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <p>No campaigns found. Create one to get started!</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentCampaigns.map((campaign) => (
-              <Card key={campaign.address} className="flex flex-col">
-                <CardHeader>
-                  <CardTitle>Campaign #{campaign.code}</CardTitle>
-                  <CardDescription>
-                    Created by: {campaign.creator.slice(0, 6)}...
-                    {campaign.creator.slice(-4)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="space-y-2">
-                    <div>
-                      <Progress
-                        value={
-                          (Number(campaign.raised) / Number(campaign.goal)) *
-                          100
-                        }
-                        className="h-2"
-                      />
-                      <div className="flex justify-between mt-2">
-                        <span>
-                          {ethers.utils.formatEther(campaign.raised)} ETH
-                        </span>
-                        <span>
-                          {ethers.utils.formatEther(campaign.goal)} ETH
-                        </span>
-                      </div>
-                    </div>
-                    <p>
-                      <span className="font-semibold">Status:</span>{" "}
-                      {campaign.isActive ? "Active" : "Completed"}
-                    </p>
-                    {campaign.tokenAddress !== ethers.constants.AddressZero && (
-                      <p>
-                        <span className="font-semibold">Token:</span>{" "}
-                        {campaign.tokenAddress.slice(0, 6)}...
-                        {campaign.tokenAddress.slice(-4)}
-                      </p>
-                    )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentCampaigns.map((campaign) => (
+          <Card key={campaign.address} className="flex flex-col">
+            <CardHeader>
+              <CardTitle>
+                Campaign #{campaign.address.slice(0, 6)}...
+                {campaign.address.slice(-4)}
+              </CardTitle>
+              <CardDescription>
+                Created by: {campaign.creator.slice(0, 6)}...
+                {campaign.creator.slice(-4)}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              <div className="space-y-2">
+                <div>
+                  <Progress
+                    value={
+                      (Number(campaign.raised) / Number(campaign.goal)) * 100
+                    }
+                    className="h-2"
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span>{ethers.utils.formatEther(campaign.raised)} ETH</span>
+                    <span>{ethers.utils.formatEther(campaign.goal)} ETH</span>
                   </div>
-                  <div className="mt-4 flex justify-between">
-                    <Button variant="outline" asChild>
-                      <a href={`/campaign/${campaign.code}`}>View Details</a>
-                    </Button>
-                    {address === campaign.creator && (
-                      <Button variant="destructive">Withdraw</Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+                <p>
+                  <span className="font-semibold">Status:</span>{" "}
+                  {campaign.isActive ? "Active" : "Completed"}
+                </p>
+                {campaign.tokenAddress !== ethers.constants.AddressZero && (
+                  <p>
+                    <span className="font-semibold">Token:</span>{" "}
+                    {campaign.tokenAddress.slice(0, 6)}...
+                    {campaign.tokenAddress.slice(-4)}
+                  </p>
+                )}
+              </div>
+              <div className="mt-4 flex justify-between">
+                <Button variant="outline" asChild>
+                  <a
+                    href={`/campaigns/${campaign.address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Details
+                  </a>
+                </Button>
+                {address?.toLowerCase() === campaign.creator.toLowerCase() && (
+                  <Button variant="destructive">Withdraw</Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              <span className="flex items-center">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="flex items-center">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       )}
     </div>
   );

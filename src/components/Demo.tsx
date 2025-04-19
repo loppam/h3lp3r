@@ -21,14 +21,14 @@ import {
   useChainId,
 } from "wagmi";
 
-import { config } from "~/components/providers/WagmiProvider";
-import { Button } from "~/components/ui/Button";
-import { truncateAddress } from "~/lib/truncateAddress";
+import { config } from "@/components/providers/WagmiProvider";
+import { Button } from "@/components/ui/Button";
+import { truncateAddress } from "@/lib/truncateAddress";
 import { base, degen, mainnet, optimism, unichain } from "wagmi/chains";
 import { BaseError, UserRejectedRequestError } from "viem";
 import { useSession } from "next-auth/react";
 import { createStore } from "mipd";
-import { Label } from "~/components/ui/label";
+import { Label } from "@/components/ui/label";
 
 export default function Demo(
   { title }: { title?: string } = { title: "Frames v2 Demo" }
@@ -562,7 +562,7 @@ function SendEth() {
   const handleSend = useCallback(() => {
     sendTransaction({
       to: toAddr,
-      value: 1n,
+      value: BigInt(1),
     });
   }, [toAddr, sendTransaction]);
 

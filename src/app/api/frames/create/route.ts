@@ -1,37 +1,35 @@
-import { FrameRequest, getFrameMessage } from "@farcaster/frame-core";
 import { NextRequest, NextResponse } from "next/server";
+import { createCampaign } from "@/lib/contracts";
+import { ethers } from "ethers";
 
 export async function POST(req: NextRequest) {
-  const body: FrameRequest = await req.json();
-  const { isValid, message } = await getFrameMessage(body);
+  const body = await req.json();
+  const { untrustedData } = body;
 
-  if (!isValid) {
-    return new NextResponse("Invalid frame request", { status: 400 });
+  if (!untrustedData) {
+    return new NextResponse("Invalid request", { status: 400 });
   }
 
-  // Return the campaign creation form frame
+  const { tokenAddress, goal } = untrustedData;
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL
+  );
+  const signer = provider.getSigner();
+
+  const campaign = await createCampaign(
+    tokenAddress || ethers.constants.AddressZero,
+    goal || "1.0",
+    signer
+  );
+
   return new NextResponse(
-    `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content="${process.env.NEXT_PUBLIC_URL}/images/create-campaign.png" />
-        <meta property="fc:frame:input:text" content="Campaign Title" />
-        <meta property="fc:frame:input:text" content="Description" />
-        <meta property="fc:frame:input:text" content="Goal Amount (ETH)" />
-        <meta property="fc:frame:button:1" content="Create Campaign" />
-        <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content="${process.env.NEXT_PUBLIC_URL}/api/frames/create/submit" />
-        <meta property="fc:frame:button:2" content="Back" />
-        <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content="${process.env.NEXT_PUBLIC_URL}/api/frames" />
-      </head>
-    </html>
-  `,
+    JSON.stringify({
+      campaign,
+    }),
     {
+      status: 200,
       headers: {
-        "Content-Type": "text/html",
+        "Content-Type": "application/json",
       },
     }
   );

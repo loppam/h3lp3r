@@ -3,12 +3,27 @@ import {
   parseWebhookEvent,
   verifyAppKeyWithNeynar,
 } from "@farcaster/frame-node";
-import { NextRequest } from "next/server";
-import {
-  deleteUserNotificationDetails,
-  setUserNotificationDetails,
-} from "~/lib/kv";
-import { sendFrameNotification } from "~/lib/notifs";
+import { NextRequest, NextResponse } from "next/server";
+import { kv } from "@/lib/kv";
+import { sendNotification } from "@/lib/notifs";
+
+type EventType =
+  | "frame_added"
+  | "frame_removed"
+  | "notifications_enabled"
+  | "notifications_disabled"
+  | "contribution";
+
+interface NotificationDetails {
+  enabled: boolean;
+  channel: string;
+  settings?: Record<string, unknown>;
+}
+
+interface WebhookEvent {
+  event: EventType;
+  notificationDetails?: NotificationDetails;
+}
 
 export async function POST(request: NextRequest) {
   const requestJson = await request.json();
@@ -43,40 +58,53 @@ export async function POST(request: NextRequest) {
   }
 
   const fid = data.fid;
-  const event = data.event;
+  const event = data.event as WebhookEvent;
 
   switch (event.event) {
     case "frame_added":
       if (event.notificationDetails) {
-        await setUserNotificationDetails(fid, event.notificationDetails);
-        await sendFrameNotification({
+        await kv.set(`notificationDetails-${fid}`, event.notificationDetails);
+        await sendNotification({
           fid,
           title: "Welcome to Frames v2",
-          body: "Frame is now added to your client",
+          message: "Frame is now added to your client",
         });
       } else {
-        await deleteUserNotificationDetails(fid);
+        await kv.delete(`notificationDetails-${fid}`);
       }
 
       break;
     case "frame_removed":
-      await deleteUserNotificationDetails(fid);
+      await kv.delete(`notificationDetails-${fid}`);
 
       break;
     case "notifications_enabled":
-      await setUserNotificationDetails(fid, event.notificationDetails);
-      await sendFrameNotification({
+      await kv.set(`notificationDetails-${fid}`, event.notificationDetails);
+      await sendNotification({
         fid,
         title: "Ding ding ding",
-        body: "Notifications are now enabled",
+        message: "Notifications are now enabled",
       });
 
       break;
     case "notifications_disabled":
-      await deleteUserNotificationDetails(fid);
+      await kv.delete(`notificationDetails-${fid}`);
+
+      break;
+    case "contribution":
+      const notificationDetails = await kv.get<NotificationDetails>(
+        `notificationDetails-${fid}`
+      );
+      if (notificationDetails) {
+        await sendNotification({
+          fid,
+          title: "New Contribution",
+          message: `Someone contributed to your campaign!`,
+        });
+      }
 
       break;
   }
 
-  return Response.json({ success: true });
+  return NextResponse.json({ success: true });
 }

@@ -1,7 +1,6 @@
-import { CampaignFactory, FundCampaign } from "@/contracts/types";
-import { useContract, useProvider, useSigner } from "wagmi";
+import { useWalletClient } from "wagmi";
 import { ethers } from "ethers";
-import { CampaignFactory as CampaignFactoryJson } from "@/contracts/CampaignFactory.json";
+import CampaignFactoryJson from "@/contracts/CampaignFactory.json";
 
 // Contract addresses (replace with your deployed addresses)
 export const CONTRACT_ADDRESSES = {
@@ -25,25 +24,22 @@ export const FUND_CAMPAIGN_ABI = [
 ];
 
 export function useCampaignFactory() {
-  const provider = useProvider();
-  const { data: signer } = useSigner();
+  const { data: walletClient } = useWalletClient();
 
-  return useContract({
-    addressOrName: CONTRACT_ADDRESSES.factory,
-    contractInterface: CAMPAIGN_FACTORY_ABI,
-    signerOrProvider: signer || provider,
-  });
-}
+  const getContract = () => {
+    if (!walletClient) return null;
+    const provider = new ethers.providers.Web3Provider(
+      walletClient as ethers.providers.ExternalProvider
+    );
+    const signer = provider.getSigner();
+    return new ethers.Contract(
+      process.env.NEXT_PUBLIC_CAMPAIGN_FACTORY_ADDRESS!,
+      CampaignFactoryJson.abi,
+      signer
+    );
+  };
 
-export function useFundCampaign(campaignAddress: string) {
-  const provider = useProvider();
-  const { data: signer } = useSigner();
-
-  return useContract({
-    addressOrName: campaignAddress,
-    contractInterface: FUND_CAMPAIGN_ABI,
-    signerOrProvider: signer || provider,
-  });
+  return getContract();
 }
 
 const CAMPAIGN_FACTORY_ADDRESS =
@@ -54,6 +50,16 @@ export interface Campaign {
   creator: string;
   goal: string;
   raised: string;
+  tokenAddress: string;
+  isActive: boolean;
+  code: string;
+}
+
+interface RawCampaign {
+  campaign: string;
+  creator: string;
+  goal: ethers.BigNumber;
+  raised: ethers.BigNumber;
   tokenAddress: string;
   isActive: boolean;
   code: string;
@@ -85,7 +91,9 @@ export async function createCampaign(
   const tx = await factory.createCampaign(tokenAddress, goalWei, code);
   const receipt = await tx.wait();
 
-  const event = receipt.events?.find((e: any) => e.event === "CampaignCreated");
+  const event = receipt.events?.find(
+    (e: ethers.Event) => e.event === "CampaignCreated"
+  );
   if (!event) throw new Error("Campaign creation failed");
 
   return {
@@ -97,7 +105,9 @@ export async function createCampaign(
 export async function getCampaigns(): Promise<Campaign[]> {
   if (!window.ethereum) throw new Error("No Ethereum provider found");
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum as ethers.providers.ExternalProvider
+  );
   const factory = new ethers.Contract(
     CAMPAIGN_FACTORY_ADDRESS,
     CampaignFactoryJson.abi,
@@ -105,7 +115,7 @@ export async function getCampaigns(): Promise<Campaign[]> {
   );
 
   const campaigns = await factory.getCampaigns();
-  return campaigns.map((campaign: any) => ({
+  return campaigns.map((campaign: RawCampaign) => ({
     address: campaign.campaign,
     creator: campaign.creator,
     goal: campaign.goal.toString(),
@@ -121,7 +131,9 @@ export async function getCampaignByCode(
 ): Promise<Campaign | null> {
   if (!window.ethereum) throw new Error("No Ethereum provider found");
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum as any);
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum as ethers.providers.ExternalProvider
+  );
   const factory = new ethers.Contract(
     CAMPAIGN_FACTORY_ADDRESS,
     CampaignFactoryJson.abi,
@@ -139,7 +151,8 @@ export async function getCampaignByCode(
       isActive: campaign.isActive,
       code: campaign.code,
     };
-  } catch (error) {
+  } catch (err) {
+    console.error("Error fetching campaign:", err);
     return null;
   }
 }

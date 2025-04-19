@@ -49,7 +49,7 @@ export default function App() {
       }
 
       const provider = new ethers.providers.Web3Provider(
-        window.ethereum as any
+        window.ethereum as ethers.providers.ExternalProvider
       );
       const signer = provider.getSigner();
 
@@ -76,99 +76,108 @@ export default function App() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24">
-      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8 text-center">H3LP3R</h1>
-        <p className="text-xl mb-8 text-center">
-          Decentralized Crowdfunding Platform
-        </p>
-
-        {!isConnected ? (
-          <div className="flex justify-center">
-            <Button onClick={() => connect({ connector: injected() })}>
-              Connect Wallet
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Campaign</CardTitle>
-                <CardDescription>
-                  Start a new crowdfunding campaign
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Campaign Title</Label>
-                    <Input
-                      id="title"
-                      value={campaignTitle}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setCampaignTitle(e.target.value)
-                      }
-                      placeholder="Enter campaign title"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={campaignDescription}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setCampaignDescription(e.target.value)
-                      }
-                      placeholder="Enter campaign description"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="goal">Goal Amount (ETH)</Label>
-                    <Input
-                      id="goal"
-                      type="number"
-                      value={campaignGoal}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setCampaignGoal(e.target.value)
-                      }
-                      placeholder="Enter goal amount in ETH"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="token">Token Address (Optional)</Label>
-                    <Input
-                      id="token"
-                      value={tokenAddress}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setTokenAddress(e.target.value)
-                      }
-                      placeholder="Enter token address (0x...) or leave empty for ETH"
-                    />
-                  </div>
-                  {error && <div className="text-red-500 text-sm">{error}</div>}
-                  {success && (
-                    <div className="text-green-500 text-sm">{success}</div>
-                  )}
-                  <Button onClick={handleCreateCampaign} disabled={isLoading}>
-                    {isLoading ? "Creating..." : "Create Campaign"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold mb-4">Active Campaigns</h2>
-              <CampaignList />
-            </div>
-
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900">Campaign Manager</h1>
+          {address && (
+            <p className="mt-2 text-sm text-gray-600">
+              Connected wallet: {address.slice(0, 6)}...{address.slice(-4)}
+            </p>
+          )}
+        </div>
+      </header>
+      <main>
+        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          {!isConnected ? (
             <div className="flex justify-center">
-              <Button variant="outline" onClick={() => disconnect()}>
-                Disconnect Wallet
+              <Button onClick={() => connect({ connector: injected() })}>
+                Connect Wallet
               </Button>
             </div>
-          </div>
-        )}
-      </div>
-    </main>
+          ) : (
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create Campaign</CardTitle>
+                  <CardDescription>
+                    Start a new crowdfunding campaign
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Campaign Title</Label>
+                      <Input
+                        id="title"
+                        value={campaignTitle}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setCampaignTitle(e.target.value)
+                        }
+                        placeholder="Enter campaign title"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={campaignDescription}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                          setCampaignDescription(e.target.value)
+                        }
+                        placeholder="Enter campaign description"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="goal">Goal Amount (ETH)</Label>
+                      <Input
+                        id="goal"
+                        type="number"
+                        value={campaignGoal}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setCampaignGoal(e.target.value)
+                        }
+                        placeholder="Enter goal amount in ETH"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="token">Token Address (Optional)</Label>
+                      <Input
+                        id="token"
+                        value={tokenAddress}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setTokenAddress(e.target.value)
+                        }
+                        placeholder="Enter token address (0x...) or leave empty for ETH"
+                      />
+                    </div>
+                    {error && (
+                      <div className="text-red-500 text-sm">{error}</div>
+                    )}
+                    {success && (
+                      <div className="text-green-500 text-sm">{success}</div>
+                    )}
+                    <Button onClick={handleCreateCampaign} disabled={isLoading}>
+                      {isLoading ? "Creating..." : "Create Campaign"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Active Campaigns</h2>
+                <CampaignList />
+              </div>
+
+              <div className="flex justify-center">
+                <Button variant="outline" onClick={() => disconnect()}>
+                  Disconnect Wallet
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
