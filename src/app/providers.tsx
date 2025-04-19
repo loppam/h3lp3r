@@ -11,15 +11,10 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [context, setContext] = useState<any>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Get frame context
-        const frameContext = await sdk.context;
-        setContext(frameContext);
-
         // Set up MIPD store
         const store = createStore();
         store.subscribe((providerDetails) => {

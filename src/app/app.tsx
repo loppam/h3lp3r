@@ -17,18 +17,19 @@ export default function App() {
   const { disconnect } = useDisconnect();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCode, setSearchCode] = useState("");
-  const [context, setContext] = useState<any>(null);
+  const [isFrame, setIsFrame] = useState(false);
 
   useEffect(() => {
-    const loadContext = async () => {
+    const checkFrame = async () => {
       try {
-        const frameContext = await sdk.context;
-        setContext(frameContext);
+        const context = await sdk.context;
+        // Check if we're in a frame by checking if we have a frame context
+        setIsFrame(!!context?.client);
       } catch (error) {
-        console.error("Error loading frame context:", error);
+        console.error("Error checking frame context:", error);
       }
     };
-    loadContext();
+    checkFrame();
   }, []);
 
   const handleSearchByCode = async () => {
@@ -49,7 +50,7 @@ export default function App() {
   };
 
   // If we're in a frame context, we should already be connected
-  const shouldShowConnectButton = !context?.client?.isFrame;
+  const shouldShowConnectButton = !isFrame;
 
   return (
     <div className="min-h-screen bg-gray-100">
