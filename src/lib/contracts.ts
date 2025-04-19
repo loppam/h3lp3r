@@ -56,16 +56,6 @@ export interface Campaign {
   tokenAddress: string;
 }
 
-interface RawCampaign {
-  campaign: string;
-  creator: string;
-  goal: ethers.BigNumber;
-  raised: ethers.BigNumber;
-  tokenAddress: string;
-  isActive: boolean;
-  code: string;
-}
-
 function generateCampaignCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";

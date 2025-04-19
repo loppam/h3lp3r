@@ -13,7 +13,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Initialize the frame SDK
     sdk.actions.ready({
       disableNativeGestures: true,
-      frameUrl: "https://h3lp3r.vercel.app",
     });
   }, []);
 

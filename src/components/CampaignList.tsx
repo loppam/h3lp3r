@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/input";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { Campaign, getCampaigns } from "@/lib/contracts";
@@ -28,7 +27,6 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { address } = useAccount();
-  const [searchQueryState, setSearchQuery] = useState(searchQuery);
 
   useEffect(() => {
     async function fetchCampaigns() {
@@ -49,22 +47,18 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   }, []);
 
   useEffect(() => {
-    if (searchQueryState) {
+    if (searchQuery) {
       const filtered = campaigns.filter(
         (campaign) =>
-          campaign.title
-            .toLowerCase()
-            .includes(searchQueryState.toLowerCase()) ||
-          campaign.description
-            .toLowerCase()
-            .includes(searchQueryState.toLowerCase())
+          campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredCampaigns(filtered);
       setCurrentPage(1);
     } else {
       setFilteredCampaigns(campaigns);
     }
-  }, [searchQueryState, campaigns]);
+  }, [searchQuery, campaigns]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

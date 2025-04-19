@@ -16,7 +16,6 @@ export default function App() {
   const { disconnect } = useDisconnect();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCode, setSearchCode] = useState("");
-  const [frameState, setFrameState] = useState<"help" | "get-help">("help");
 
   useEffect(() => {
     sdk.actions.ready();
