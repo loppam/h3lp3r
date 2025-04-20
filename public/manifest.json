@@ -1,0 +1,25 @@
+{
+  "name": "H3LP3R",
+  "description": "A decentralized crowdfunding platform on Farcaster",
+  "icon": "https://h3lp3r.vercel.app/images/logo.png",
+  "screenshots": ["https://h3lp3r.vercel.app/images/helper.png"],
+  "url": "https://h3lp3r.vercel.app",
+  "frame": {
+    "version": "vNext",
+    "image": {
+      "aspectRatio": "1.91:1",
+      "src": "https://h3lp3r.vercel.app/images/helper.png"
+    },
+    "buttons": [
+      {
+        "label": "H3LP",
+        "action": "post",
+        "target": "https://h3lp3r.vercel.app/api/frames/launch"
+      }
+    ],
+    "postUrl": "https://h3lp3r.vercel.app/api/frames/launch",
+    "input": {
+      "text": "Enter H3LP code"
+    }
+  }
+}
