@@ -10,7 +10,7 @@ export async function GET() {
         "MHhkZTU5NzY5ZjFlMDY0YmU4ZmY5MGVmYzdhNWI5OTA1MWE0OTBjNzUyODVkNzg5ZDUyZjViNjY4ZmU1N2UzYTIxM2Q1OTczMzcwZDI5YzRjYTI5NzJhYmExY2EwNDQzYmI5MTY1MGM0NmFkZDU0ZDgxNjEwMzYwM2I5NTk4ZmRkZDFi",
     },
     frame: {
-      version: "vNext",
+      version: "next",
       name: "H3LP3R",
       iconUrl: `${appUrl}/images/helper.png`,
       homeUrl: appUrl,
