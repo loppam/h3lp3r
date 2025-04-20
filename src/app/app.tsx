@@ -13,7 +13,7 @@ import { sdk } from "@farcaster/frame-sdk";
 import { getUserProfileData } from "@/lib/utils";
 
 export default function App() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const [searchInput, setSearchInput] = useState("");
@@ -47,9 +47,9 @@ export default function App() {
         const context = await sdk.context;
         setIsFrame(!!context?.client);
 
-        if (context?.fid) {
+        if (context?.user?.fid) {
           // Get user profile data from FID
-          const profile = await getUserProfileData(context.fid.toString());
+          const profile = await getUserProfileData(context.user.fid.toString());
           if (profile) {
             setUserProfile(profile);
           }
