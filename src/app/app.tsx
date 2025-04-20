@@ -9,15 +9,13 @@ import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
 import { config } from "@/lib/wagmi";
 import { base } from "wagmi/chains";
-import { sdk } from "@farcaster/frame-sdk";
-import { getUserProfileData } from "@/lib/utils";
-
+import { getUserProfileByAddress } from "@/lib/utils";
+const NEYNAR_API_KEY = process.env.NEXT_PUBLIC_NEYNAR_API_KEY;
 export default function App() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const [searchInput, setSearchInput] = useState("");
-  const [isFrame, setIsFrame] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<{
     pfpUrl: string;
@@ -44,41 +42,25 @@ export default function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const context = await sdk.context;
-        setIsFrame(!!context?.client);
-
         // Initialize app
-        await Promise.all([
-          // Load user profile if connected
-          address ? getUserProfileData("dwr") : null,
-          // Add other initialization tasks here
-        ]);
+        if (address) {
+          const profile = await getUserProfileByAddress(address);
+          if (profile) {
+            setUserProfile({
+              pfpUrl: profile.pfpUrl,
+              username: profile.username,
+              displayName: profile.displayName,
+            });
+          }
+        }
 
         setIsLoading(false);
-        // Hide splash screen when ready
-        await sdk.actions.ready();
       } catch (error) {
         console.error("Error initializing app:", error);
         setIsLoading(false);
       }
     };
     load();
-  }, [address]);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (address) {
-        const profile = await getUserProfileData("dwr");
-        if (profile) {
-          setUserProfile({
-            pfpUrl: profile.pfpUrl,
-            username: profile.username,
-            displayName: profile.displayName,
-          });
-        }
-      }
-    };
-    fetchProfile();
   }, [address]);
 
   const handleSearch = async () => {
@@ -96,9 +78,6 @@ export default function App() {
     }
     // Otherwise, use it as a search query for the campaign list
   };
-
-  // If we're in a frame, we should already be connected
-  const shouldShowConnectButton = !isFrame;
 
   if (isLoading) {
     return (
@@ -143,17 +122,15 @@ export default function App() {
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
                       {address.slice(0, 6)}...{address.slice(-4)}
                     </div>
-                    {shouldShowConnectButton && (
-                      <button
-                        onClick={() => {
-                          disconnect();
-                          setIsDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Disconnect
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        disconnect();
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Disconnect
+                    </button>
                   </div>
                 )}
               </div>
@@ -163,7 +140,7 @@ export default function App() {
       </header>
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {!isConnected && shouldShowConnectButton ? (
+          {!isConnected ? (
             <div className="flex justify-center">
               <Button
                 onClick={() =>
@@ -194,7 +171,7 @@ export default function App() {
                 />
                 <Button onClick={handleSearch}>Search</Button>
               </div>
-
+              <span>{NEYNAR_API_KEY}</span>
               <CampaignList searchQuery={searchInput} />
             </div>
           )}
