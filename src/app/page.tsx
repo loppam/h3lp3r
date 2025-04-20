@@ -6,19 +6,12 @@ const frame = {
   imageUrl: `https://h3lp3r.vercel.app/images/helper.png`,
   buttons: [
     {
-      title: "Create Campaign",
+      title: "H3LP",
       action: {
         type: "post",
-        target: `https://h3lp3r.vercel.app/api/frames/create`,
+        target: `https://h3lp3r.vercel.app/api/frames/launch`,
       },
-    },
-    {
-      title: "View Campaigns",
-      action: {
-        type: "post",
-        target: `https://h3lp3r.vercel.app/api/frames/campaigns`,
-      },
-    },
+    }
   ],
 };
 
