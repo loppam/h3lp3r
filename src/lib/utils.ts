@@ -5,12 +5,23 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const NEYNAR_API_KEY = process.env.NEXT_PUBLIC_NEYNAR_API_KEY;
-// const NEYNAR_WEBHOOK_URL =
-//   "https://api.neynar.com/f/app/76b1a64a-624e-4b88-8571-673e7b74e9cb/event";
+// Get Neynar API key with validation
+const getNeynarApiKey = () => {
+  const apiKey = process.env.NEXT_PUBLIC_NEYNAR_API_KEY;
+  if (!apiKey) {
+    console.error("NEXT_PUBLIC_NEYNAR_API_KEY is not set");
+    return "";
+  }
+  return apiKey;
+};
 
 export async function getUserProfileData(identifier: string) {
   try {
+    const apiKey = getNeynarApiKey();
+    if (!apiKey) {
+      throw new Error("Neynar API key is not configured");
+    }
+
     // Check if the identifier is a FID (numeric) or username
     const isFid = !isNaN(Number(identifier));
     const endpoint = isFid
@@ -19,7 +30,8 @@ export async function getUserProfileData(identifier: string) {
 
     const res = await fetch(endpoint, {
       headers: {
-        api_key: NEYNAR_API_KEY || "",
+        api_key: apiKey,
+        "Content-Type": "application/json",
       },
     });
 
@@ -60,11 +72,17 @@ export async function getUserProfileData(identifier: string) {
 
 export async function getUserProfileByAddress(address: string) {
   try {
+    const apiKey = getNeynarApiKey();
+    if (!apiKey) {
+      throw new Error("Neynar API key is not configured");
+    }
+
     const res = await fetch(
       `https://api.neynar.com/v2/farcaster/user/bulk?addresses=${address}`,
       {
         headers: {
-          api_key: NEYNAR_API_KEY || "",
+          api_key: apiKey,
+          "Content-Type": "application/json",
         },
       }
     );

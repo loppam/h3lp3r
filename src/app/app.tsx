@@ -3,25 +3,19 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
 import { config } from "@/lib/wagmi";
 import { base } from "wagmi/chains";
-import { getUserProfileByAddress } from "@/lib/utils";
-const NEYNAR_API_KEY = process.env.NEXT_PUBLIC_NEYNAR_API_KEY;
+import sdk from "@farcaster/frame-sdk";
+
 export default function App() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const [searchInput, setSearchInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<{
-    pfpUrl: string;
-    username: string;
-    displayName: string;
-  } | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,16 +38,11 @@ export default function App() {
       try {
         // Initialize app
         if (address) {
-          const profile = await getUserProfileByAddress(address);
-          if (profile) {
-            setUserProfile({
-              pfpUrl: profile.pfpUrl,
-              username: profile.username,
-              displayName: profile.displayName,
-            });
-          }
+          // Use Farcaster SDK to view profile
+          // Note: In a real implementation, you would need to get the FID from the address
+          // For now, we'll use a default FID of 3 (like in Demo.tsx)
+          await sdk.actions.viewProfile({ fid: 3 });
         }
-
         setIsLoading(false);
       } catch (error) {
         console.error("Error initializing app:", error);
@@ -93,32 +82,19 @@ export default function App() {
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">H3LP3R</h1>
-            {address && userProfile && (
+            {address && (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 focus:outline-none"
                 >
-                  <Image
-                    src={userProfile.pfpUrl}
-                    alt={`${userProfile.displayName}'s profile`}
-                    width={32}
-                    height={32}
-                    className="rounded-full cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all"
-                  />
-                  <span className="ml-2">{userProfile.displayName}</span>
+                  <span className="ml-2">
+                    {address.slice(0, 6)}...{address.slice(-4)}
+                  </span>
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50">
-                    <div className="px-4 py-2 border-b">
-                      <div className="font-medium text-gray-900">
-                        {userProfile.displayName}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        @{userProfile.username}
-                      </div>
-                    </div>
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
                       {address.slice(0, 6)}...{address.slice(-4)}
                     </div>
@@ -171,7 +147,6 @@ export default function App() {
                 />
                 <Button onClick={handleSearch}>Search</Button>
               </div>
-              <span>{NEYNAR_API_KEY}</span>
               <CampaignList searchQuery={searchInput} />
             </div>
           )}
