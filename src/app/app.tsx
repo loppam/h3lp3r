@@ -20,16 +20,16 @@ export default function App() {
   const [isFrame, setIsFrame] = useState(false);
 
   useEffect(() => {
-    const checkFrame = async () => {
+    const load = async () => {
       try {
         const context = await sdk.context;
-        // Check if we're in a frame by checking if we have a frame context
         setIsFrame(!!context?.client);
+        sdk.actions.ready();
       } catch (error) {
         console.error("Error checking frame context:", error);
       }
     };
-    checkFrame();
+    load();
   }, []);
 
   const handleSearchByCode = async () => {
@@ -49,7 +49,7 @@ export default function App() {
     }
   };
 
-  // If we're in a frame context, we should already be connected
+  // If we're in a frame, we should already be connected
   const shouldShowConnectButton = !isFrame;
 
   return (

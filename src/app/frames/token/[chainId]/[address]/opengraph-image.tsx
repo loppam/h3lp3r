@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { base } from "wagmi/chains";
 
 export const runtime = "edge";
 
@@ -17,9 +18,11 @@ interface Props {
   }>;
 }
 
-export default async function Image({ params }: Props) {
+export default async function OpengraphImage({ params }: Props) {
   const { chainId, address } = await params;
-  const token = `eip155:${chainId}/erc20:${address}`;
+  // Default to Base chain if not specified
+  const effectiveChainId = chainId || base.id.toString();
+  const token = `eip155:${effectiveChainId}/erc20:${address}`;
 
   return new ImageResponse(
     (

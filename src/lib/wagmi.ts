@@ -1,9 +1,11 @@
 import { http, createConfig } from "wagmi";
-import { sepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
 
 export const config = createConfig({
-  chains: [sepolia],
+  chains: [base],
   transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
+    [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL),
   },
+  connectors: [farcasterFrame()],
 });

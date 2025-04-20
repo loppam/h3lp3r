@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import App from "./app";
 
-const appUrl = process.env.NEXT_PUBLIC_URL;
-
 const frame = {
   version: "next",
   imageUrl: `https://h3lp3r.vercel.app/images/helper.png`,
