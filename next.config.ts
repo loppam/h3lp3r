@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_CAMPAIGN_FACTORY_ADDRESS:
       process.env.NEXT_PUBLIC_CAMPAIGN_FACTORY_ADDRESS,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

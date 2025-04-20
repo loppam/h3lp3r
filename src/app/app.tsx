@@ -3,13 +3,13 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
 import { config } from "@/lib/wagmi";
 import { base } from "wagmi/chains";
 import sdk, { type Context } from "@farcaster/frame-sdk";
+import Image from "next/image";
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -92,7 +92,7 @@ export default function App() {
                 >
                   <Image
                     src={context.user.pfpUrl || "/images/default-avatar.png"}
-                    alt={`${context.user.displayName}'s profile`}
+                    alt={`${context.user.username}'s profile`}
                     width={32}
                     height={32}
                     className="rounded-full cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all"
