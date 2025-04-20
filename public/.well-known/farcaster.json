@@ -10,5 +10,10 @@
     "splashBackgroundColor": "#ffffff",
     "webhookUrl": "/api/frame",
     "authorizedDomains": ["h3lp3r.vercel.app"]
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjMyNDAzNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDM5OTgzOURlYUQ2NUIxNmVFOTdkOGRBZmI0NDVGMjQ0ODA5MUFhNTcifQ",
+    "payload": "eyJkb21haW4iOiJoM2xwM3IudmVyY2VsLmFwcCJ9",
+    "signature": "MHhkZTU5NzY5ZjFlMDY0YmU4ZmY5MGVmYzdhNWI5OTA1MWE0OTBjNzUyODVkNzg5ZDUyZjViNjY4ZmU1N2UzYTIxM2Q1OTczMzcwZDI5YzRjYTI5NzJhYmExY2EwNDQzYmI5MTY1MGM0NmFkZDU0ZDgxNjEwMzYwM2I5NTk4ZmRkZDFi"
   }
 }
