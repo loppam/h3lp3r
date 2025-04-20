@@ -127,6 +127,7 @@ export default function App() {
                     height={40}
                     className="rounded-full cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all"
                   />
+                  <span className="ml-2">{userProfile.displayName}</span>
                 </button>
 
                 {isDropdownOpen && (
@@ -171,7 +172,7 @@ export default function App() {
             <div className="space-y-8">
               <div className="flex justify-end">
                 <Button onClick={() => (window.location.href = "/create")}>
-                  Create H3LP
+                  GET H3LP
                 </Button>
               </div>
 
