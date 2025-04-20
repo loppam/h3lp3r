@@ -106,9 +106,6 @@ export default function App() {
                       <div className="font-medium text-gray-900">
                         {context.user.displayName}
                       </div>
-                      <div className="font-medium text-gray-900">
-                        {context.user.pfpUrl}
-                      </div>
                       <div className="text-sm text-gray-500">
                         @{context.user.username}
                       </div>
