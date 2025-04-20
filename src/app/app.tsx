@@ -97,7 +97,7 @@ export default function App() {
                     height={32}
                     className="rounded-full cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all"
                   />
-                  <span className="ml-2">{context.user.displayName}</span>
+                  <span className="ml-2">{context.user.username}</span>
                 </button>
 
                 {isDropdownOpen && (
@@ -105,6 +105,9 @@ export default function App() {
                     <div className="px-4 py-2 border-b">
                       <div className="font-medium text-gray-900">
                         {context.user.displayName}
+                      </div>
+                      <div className="font-medium text-gray-900">
+                        {context.user.pfpUrl}
                       </div>
                       <div className="text-sm text-gray-500">
                         @{context.user.username}
