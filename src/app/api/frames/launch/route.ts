@@ -25,7 +25,7 @@ function getFrameHtmlResponse(frame: {
   buttons: Array<{
     label: string;
     action: "post" | "link";
-    target?: string;
+    target_base_url?: string;
   }>;
   inputText?: string;
   postUrl?: string;
@@ -49,10 +49,10 @@ function getFrameHtmlResponse(frame: {
               button.action
             }" />
           ${
-            button.target
+            button.target_base_url
               ? `<meta property="fc:frame:button:${
                   index + 1
-                }:target" content="${button.target}" />`
+                }:target_base_url" content="${button.target_base_url}" />`
               : ""
           }
         `
@@ -94,12 +94,12 @@ export async function POST(req: NextRequest) {
                   {
                     label: "View Campaign",
                     action: "link",
-                    target: `https://h3lp3r.vercel.app/campaign/${campaign.address}`,
+                    target_base_url: `https://h3lp3r.vercel.app/campaign/${campaign.address}`,
                   },
                   {
                     label: "GET H3LP",
                     action: "link",
-                    target: "https://h3lp3r.vercel.app/create",
+                    target_base_url: "https://h3lp3r.vercel.app",
                   },
                 ],
               })
@@ -119,12 +119,12 @@ export async function POST(req: NextRequest) {
             {
               label: "View All Campaigns",
               action: "link",
-              target: "https://h3lp3r.vercel.app",
+              target_base_url: "https://h3lp3r.vercel.app",
             },
             {
               label: "GET H3LP",
               action: "link",
-              target: "https://h3lp3r.vercel.app/create",
+              target_base_url: "https://h3lp3r.vercel.app",
             },
           ],
         })
@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
           {
             label: "GET H3LP",
             action: "link",
-            target: "https://h3lp3r.vercel.app/create",
+            target_base_url: "https://h3lp3r.vercel.app",
           },
         ],
         inputText: "Enter H3LP code (optional)",

@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "fc:frame:button:1:action": "post",
       "fc:frame:button:2": "GET H3LP",
       "fc:frame:button:2:action": "link",
-      "fc:frame:button:2:target": "https://h3lp3r.vercel.app/create",
+      "fc:frame:button:2:target_base_url": "https://h3lp3r.vercel.app",
       "fc:frame:post_url": "https://h3lp3r.vercel.app/api/frames/launch",
       "fc:frame:input:text": "Enter H3LP code (optional)",
       // Mini App metadata
