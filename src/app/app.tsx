@@ -16,9 +16,9 @@ export default function App() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchCode, setSearchCode] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [isFrame, setIsFrame] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<{
     pfpUrl: string;
     username: string;
@@ -46,20 +46,29 @@ export default function App() {
       try {
         const context = await sdk.context;
         setIsFrame(!!context?.client);
-        sdk.actions.ready();
+
+        // Initialize app
+        await Promise.all([
+          // Load user profile if connected
+          address ? getUserProfileData("dwr") : null,
+          // Add other initialization tasks here
+        ]);
+
+        setIsLoading(false);
+        // Hide splash screen when ready
+        await sdk.actions.ready();
       } catch (error) {
-        console.error("Error checking frame context:", error);
+        console.error("Error initializing app:", error);
+        setIsLoading(false);
       }
     };
     load();
-  }, []);
+  }, [address]);
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (address) {
-        // In a real app, you would have a way to get the Farcaster username from the address
-        // For now, we'll use a placeholder
-        const profile = await getUserProfileData("dwr"); // Replace with actual username lookup
+        const profile = await getUserProfileData("dwr");
         if (profile) {
           setUserProfile({
             pfpUrl: profile.pfpUrl,
@@ -72,25 +81,32 @@ export default function App() {
     fetchProfile();
   }, [address]);
 
-  const handleSearchByCode = async () => {
-    if (searchCode.length !== 4) {
-      alert("Please enter a valid 4-character code");
-      return;
-    }
-    try {
-      const campaign = await getCampaignByCode(searchCode);
-      if (campaign) {
-        window.location.href = `/campaign/${campaign.address}`;
-      } else {
-        alert("No H3LP found with this code");
+  const handleSearch = async () => {
+    // If input is 4 characters, try to find campaign by code
+    if (searchInput.length === 4) {
+      try {
+        const campaign = await getCampaignByCode(searchInput.toUpperCase());
+        if (campaign) {
+          window.location.href = `/campaign/${campaign.address}`;
+          return;
+        }
+      } catch (error) {
+        console.error("Error searching for campaign:", error);
       }
-    } catch {
-      alert("Error searching for H3LP");
     }
+    // Otherwise, use it as a search query for the campaign list
   };
 
   // If we're in a frame, we should already be connected
   const shouldShowConnectButton = !isFrame;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -161,26 +177,16 @@ export default function App() {
 
               <div className="flex gap-4">
                 <Input
-                  placeholder="Search H3LPs..."
+                  placeholder="Search H3LPs or enter code (4 chars)"
                   className="flex-1"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
+                  maxLength={searchInput.length === 4 ? 4 : undefined}
                 />
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter H3LP code (4 chars)"
-                    className="w-40"
-                    value={searchCode}
-                    onChange={(e) =>
-                      setSearchCode(e.target.value.toUpperCase())
-                    }
-                    maxLength={4}
-                  />
-                  <Button onClick={handleSearchByCode}>Search</Button>
-                </div>
+                <Button onClick={handleSearch}>Search</Button>
               </div>
 
-              <CampaignList searchQuery={searchQuery} />
+              <CampaignList searchQuery={searchInput} />
             </div>
           )}
         </div>

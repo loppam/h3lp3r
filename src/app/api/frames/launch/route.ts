@@ -19,37 +19,25 @@ interface FrameRequest {
   };
 }
 
-interface FrameButton {
-  label: string;
-  action: "post" | "link";
-  target: string;
-}
-
-interface FrameImage {
-  src: string;
+function getFrameHtmlResponse(frame: {
+  image: string;
   aspectRatio: string;
-}
-
-interface FrameInput {
-  text: string;
-}
-
-interface FrameResponse {
-  image: FrameImage;
-  buttons: FrameButton[];
-  input?: FrameInput;
-  postUrl: string;
-}
-
-function getFrameHtmlResponse(frame: FrameResponse) {
+  buttons: Array<{
+    label: string;
+    action: "post" | "link";
+    target?: string;
+  }>;
+  inputText?: string;
+  postUrl?: string;
+}) {
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content="${frame.image.src}" />
+        <meta property="fc:frame:image" content="${frame.image}" />
         <meta property="fc:frame:image:aspect_ratio" content="${
-          frame.image.aspectRatio
+          frame.aspectRatio
         }" />
         ${frame.buttons
           .map(
@@ -60,20 +48,26 @@ function getFrameHtmlResponse(frame: FrameResponse) {
           <meta property="fc:frame:button:${index + 1}:action" content="${
               button.action
             }" />
-          <meta property="fc:frame:button:${index + 1}:target" content="${
-              button.target
-            }" />
+          ${
+            button.target
+              ? `<meta property="fc:frame:button:${
+                  index + 1
+                }:target" content="${button.target}" />`
+              : ""
+          }
         `
           )
           .join("")}
         ${
-          frame.input
-            ? `
-          <meta property="fc:frame:input:text" content="${frame.input.text}" />
-        `
+          frame.inputText
+            ? `<meta property="fc:frame:input:text" content="${frame.inputText}" />`
             : ""
         }
-        <meta property="fc:frame:post_url" content="${frame.postUrl}" />
+        ${
+          frame.postUrl
+            ? `<meta property="fc:frame:post_url" content="${frame.postUrl}" />`
+            : ""
+        }
       </head>
     </html>
   `;
@@ -82,124 +76,79 @@ function getFrameHtmlResponse(frame: FrameResponse) {
 export async function POST(req: NextRequest) {
   try {
     const body: FrameRequest = await req.json();
-    const { isValid, message } = { isValid: true, message: body }; // Temporary fix until proper validation
+    const inputText = body?.untrustedData?.inputText?.trim();
+    const buttonIndex = body?.untrustedData?.buttonIndex;
 
-    if (!isValid) {
-      return new NextResponse("Invalid frame message", { status: 400 });
-    }
-
-    const inputText = message?.untrustedData?.inputText;
-    const buttonIndex = message?.untrustedData?.buttonIndex;
-
-    // Handle the H3LP button click
+    // Handle H3LP button (Search or View All)
     if (buttonIndex === 1) {
       if (inputText) {
-        // If there's input text, try to find the campaign
+        // If there's input text, try to find the specific campaign
         try {
           const campaign = await getCampaignByCode(inputText.toUpperCase());
           if (campaign) {
             return new NextResponse(
               getFrameHtmlResponse({
-                image: {
-                  src: `https://h3lp3r.vercel.app/images/helper.png`,
-                  aspectRatio: "1.91:1",
-                },
+                image: "https://h3lp3r.vercel.app/images/helper.png",
+                aspectRatio: "1.91:1",
                 buttons: [
                   {
                     label: "View Campaign",
                     action: "link",
                     target: `https://h3lp3r.vercel.app/campaign/${campaign.address}`,
                   },
-                ],
-                postUrl: `https://h3lp3r.vercel.app/api/frames/launch`,
-              })
-            );
-          } else {
-            // Campaign not found
-            return new NextResponse(
-              getFrameHtmlResponse({
-                image: {
-                  src: `https://h3lp3r.vercel.app/images/helper.png`,
-                  aspectRatio: "1.91:1",
-                },
-                buttons: [
                   {
-                    label: "Try Again",
-                    action: "post",
-                    target: `https://h3lp3r.vercel.app/api/frames/launch`,
+                    label: "GET H3LP",
+                    action: "link",
+                    target: "https://h3lp3r.vercel.app/create",
                   },
                 ],
-                input: {
-                  text: "Enter H3LP code",
-                },
-                postUrl: `https://h3lp3r.vercel.app/api/frames/launch`,
               })
             );
           }
         } catch (error) {
           console.error("Error fetching campaign:", error);
-          return new NextResponse(
-            getFrameHtmlResponse({
-              image: {
-                src: `https://h3lp3r.vercel.app/images/helper.png`,
-                aspectRatio: "1.91:1",
-              },
-              buttons: [
-                {
-                  label: "Try Again",
-                  action: "post",
-                  target: `https://h3lp3r.vercel.app/api/frames/launch`,
-                },
-              ],
-              input: {
-                text: "Enter H3LP code",
-              },
-              postUrl: `https://h3lp3r.vercel.app/api/frames/launch`,
-            })
-          );
         }
-      } else {
-        // Initial frame state - ask for H3LP code
-        return new NextResponse(
-          getFrameHtmlResponse({
-            image: {
-              src: `https://h3lp3r.vercel.app/images/helper.png`,
-              aspectRatio: "1.91:1",
-            },
-            buttons: [
-              {
-                label: "H3LP",
-                action: "post",
-                target: `https://h3lp3r.vercel.app/api/frames/launch`,
-              },
-            ],
-            input: {
-              text: "Enter H3LP code",
-            },
-            postUrl: `https://h3lp3r.vercel.app/api/frames/launch`,
-          })
-        );
       }
+
+      // If no input or campaign not found, redirect to view all campaigns
+      return new NextResponse(
+        getFrameHtmlResponse({
+          image: "https://h3lp3r.vercel.app/images/helper.png",
+          aspectRatio: "1.91:1",
+          buttons: [
+            {
+              label: "View All Campaigns",
+              action: "link",
+              target: "https://h3lp3r.vercel.app",
+            },
+            {
+              label: "GET H3LP",
+              action: "link",
+              target: "https://h3lp3r.vercel.app/create",
+            },
+          ],
+        })
+      );
     }
 
-    // Default response
+    // Default response (should not reach here as button 2 is direct link)
     return new NextResponse(
       getFrameHtmlResponse({
-        image: {
-          src: `https://h3lp3r.vercel.app/images/helper.png`,
-          aspectRatio: "1.91:1",
-        },
+        image: "https://h3lp3r.vercel.app/images/helper.png",
+        aspectRatio: "1.91:1",
         buttons: [
           {
             label: "H3LP",
             action: "post",
-            target: `https://h3lp3r.vercel.app/api/frames/launch`,
+          },
+          {
+            label: "GET H3LP",
+            action: "link",
+            target: "https://h3lp3r.vercel.app/create",
           },
         ],
-        input: {
-          text: "Enter H3LP code",
-        },
-        postUrl: `https://h3lp3r.vercel.app/api/frames/launch`,
+        inputText: "Enter H3LP code (optional)",
+        postUrl: "https://h3lp3r.vercel.app/api/frames/launch",
       })
     );
   } catch (error) {

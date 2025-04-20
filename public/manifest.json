@@ -1,14 +1,30 @@
 {
   "name": "H3LP3R",
+  "short_name": "H3LP3R",
   "description": "A decentralized crowdfunding platform on Farcaster",
-  "icon": "https://h3lp3r.vercel.app/images/logo.png",
-  "screenshots": ["https://h3lp3r.vercel.app/images/helper.png"],
-  "url": "https://h3lp3r.vercel.app",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#dfdfdf",
+  "theme_color": "#dfdfdf",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "frame": {
     "version": "vNext",
     "image": {
-      "aspectRatio": "1.91:1",
-      "src": "https://h3lp3r.vercel.app/images/helper.png"
+      "src": "https://h3lp3r.vercel.app/images/helper.png",
+      "aspectRatio": "1.91:1"
     },
     "buttons": [
       {
@@ -21,5 +37,13 @@
     "input": {
       "text": "Enter H3LP code"
     }
+  },
+  "mini_app": {
+    "name": "H3LP3R",
+    "description": "A decentralized crowdfunding platform on Farcaster",
+    "image": "https://h3lp3r.vercel.app/images/helper.png",
+    "brand_color": "#dfdfdf",
+    "accepts_xmtp": true,
+    "version": "vNext"
   }
 }

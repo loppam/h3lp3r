@@ -4,15 +4,20 @@ import App from "./app";
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const title = "H3LP3R - Decentralized Crowdfunding";
+  const description =
+    "Enter a H3LP code to find and support campaigns on Farcaster";
+  const images = "https://h3lp3r.vercel.app/images/helper.png";
+
   return {
-    title: "H3LP3R - Decentralized Crowdfunding",
-    description: "A decentralized crowdfunding platform on Farcaster",
+    title,
+    description,
     openGraph: {
-      title: "H3LP3R - Decentralized Crowdfunding",
-      description: "A decentralized crowdfunding platform on Farcaster",
+      title,
+      description,
       images: [
         {
-          url: "https://h3lp3r.vercel.app/images/helper.png",
+          url: images,
           width: 1200,
           height: 630,
           alt: "H3LP3R Logo",
@@ -20,12 +25,24 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
     },
     other: {
+      // Frame metadata
       "fc:frame": "vNext",
-      "fc:frame:image": "https://h3lp3r.vercel.app/images/helper.png",
+      "fc:frame:image": images,
+      "fc:frame:image:aspect_ratio": "1.91:1",
       "fc:frame:button:1": "H3LP",
+      "fc:frame:button:1:action": "post",
+      "fc:frame:button:2": "GET H3LP",
+      "fc:frame:button:2:action": "link",
+      "fc:frame:button:2:target": "https://h3lp3r.vercel.app/create",
       "fc:frame:post_url": "https://h3lp3r.vercel.app/api/frames/launch",
-      "fc:frame:input:text": "Enter H3LP code",
-      "fc:frame:state": JSON.stringify({ counter: 0 }),
+      "fc:frame:input:text": "Enter H3LP code (optional)",
+      // Mini App metadata
+      "of:accepts:xmtp": "true",
+      "of:brand_color": "#dfdfdf",
+      "of:name": "H3LP3R",
+      "of:description": description,
+      "of:image": images,
+      "of:version": "vNext",
     },
     manifest: "/manifest.json",
   };
