@@ -3,6 +3,7 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
@@ -43,11 +44,6 @@ export default function App() {
           // Get context from Farcaster SDK
           const frameContext = await sdk.context;
           setContext(frameContext);
-
-          // If we have a valid context with user FID, view their profile
-          if (frameContext?.user?.fid) {
-            await sdk.actions.viewProfile({ fid: frameContext.user.fid });
-          }
         }
         setIsLoading(false);
       } catch (error) {
@@ -88,19 +84,32 @@ export default function App() {
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">H3LP3R</h1>
-            {address && (
+            {address && context?.user && (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 focus:outline-none"
                 >
-                  <span className="ml-2">
-                    {address.slice(0, 6)}...{address.slice(-4)}
-                  </span>
+                  <Image
+                    src={context.user.pfpUrl || "/images/default-avatar.png"}
+                    alt={`${context.user.displayName}'s profile`}
+                    width={32}
+                    height={32}
+                    className="rounded-full cursor-pointer hover:ring-2 hover:ring-gray-300 transition-all"
+                  />
+                  <span className="ml-2">{context.user.displayName}</span>
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className="px-4 py-2 border-b">
+                      <div className="font-medium text-gray-900">
+                        {context.user.displayName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        @{context.user.username}
+                      </div>
+                    </div>
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
                       {address.slice(0, 6)}...{address.slice(-4)}
                     </div>
