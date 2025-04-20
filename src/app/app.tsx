@@ -8,7 +8,7 @@ import { CampaignList } from "@/components/CampaignList";
 import { getCampaignByCode } from "@/lib/contracts";
 import { config } from "@/lib/wagmi";
 import { base } from "wagmi/chains";
-import sdk from "@farcaster/frame-sdk";
+import sdk, { type Context } from "@farcaster/frame-sdk";
 
 export default function App() {
   const { address, isConnected } = useAccount();
@@ -18,6 +18,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [context, setContext] = useState<Context.FrameContext>();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,10 +40,14 @@ export default function App() {
       try {
         // Initialize app
         if (address) {
-          // Use Farcaster SDK to view profile
-          // Note: In a real implementation, you would need to get the FID from the address
-          // For now, we'll use a default FID of 3 (like in Demo.tsx)
-          await sdk.actions.viewProfile({ fid: 3 });
+          // Get context from Farcaster SDK
+          const frameContext = await sdk.context;
+          setContext(frameContext);
+
+          // If we have a valid context with user FID, view their profile
+          if (frameContext?.user?.fid) {
+            await sdk.actions.viewProfile({ fid: frameContext.user.fid });
+          }
         }
         setIsLoading(false);
       } catch (error) {
