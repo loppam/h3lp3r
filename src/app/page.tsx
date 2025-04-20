@@ -49,5 +49,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Home() {
-  return <App>{null}</App>;
+  return <App />;
 }

@@ -41,5 +41,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function HelloNameFrame() {
-  return <App>{null}</App>;
+  return <App />;
 }
