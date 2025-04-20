@@ -1,5 +1,5 @@
 export async function GET() {
-  const appUrl = process.env.NEXT_PUBLIC_URL;
+  const appUrl = "https://h3lp3r.vercel.app/";
 
   const config = {
     accountAssociation: {
@@ -12,11 +12,11 @@ export async function GET() {
     frame: {
       version: "1",
       name: "H3LP3R",
-      iconUrl: `https://h3lp3r.vercel.app/images/logo.png`,
+      iconUrl: `${appUrl}/images/logo.png`,
       homeUrl: appUrl,
-      imageUrl: `https://h3lp3r.vercel.app/images/helper.png`,
+      imageUrl: `${appUrl}/images/helper.png`,
       buttonTitle: "H3LP",
-      splashImageUrl: `https://h3lp3r.vercel.app/images/helper.png`,
+      splashImageUrl: `${appUrl}/images/helper.png`,
       splashBackgroundColor: "#f7f7f7",
       webhookUrl: `${appUrl}/api/webhook`,
     },
