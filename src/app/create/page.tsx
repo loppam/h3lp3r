@@ -94,7 +94,7 @@ export default function CreatePage() {
         "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
       );
       const data = await response.json();
-      const ethPrice = data.ethereum.usd || 2000; // Fallback to 2000 if API fails
+      const ethPrice = data.ethereum.usd || 1588; // Fallback to 2000 if API fails
       const ethAmount = parseFloat(goalAmount) / ethPrice;
 
       const h3lpAddress = await createCampaign(
@@ -123,7 +123,7 @@ export default function CreatePage() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">H3LP3R</h1>
             <div className="flex items-center space-x-4">
-              <Button onClick={() => (window.location.href = "/create")}>
+              <Button onClick={() => (window.location.href = "/")}>
                 H3LP
               </Button>
               {address && context?.user ? (
