@@ -19,7 +19,10 @@ export async function POST(req: NextRequest) {
   const campaign = await createCampaign(
     tokenAddress || ethers.constants.AddressZero,
     goal || "1.0",
-    signer
+    signer,
+    "Untitled Campaign",
+    "No description provided",
+    undefined
   );
 
   return new NextResponse(

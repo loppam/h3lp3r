@@ -32,6 +32,7 @@ export default function CreatePage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [code, setCode] = useState("");
   const [goalAmount, setGoalAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +85,14 @@ export default function CreatePage() {
         throw new Error("No Ethereum provider found");
       }
 
+      // Validate inputs
+      if (!title.trim()) throw new Error("Title is required");
+      if (!description.trim()) throw new Error("Description is required");
+      if (!code.trim() || code.length !== 4)
+        throw new Error("Code must be exactly 4 characters");
+      if (!goalAmount || parseFloat(goalAmount) <= 0)
+        throw new Error("Goal amount must be greater than 0");
+
       const provider = new ethers.providers.Web3Provider(
         window.ethereum as ethers.providers.ExternalProvider
       );
@@ -94,19 +103,23 @@ export default function CreatePage() {
         "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
       );
       const data = await response.json();
-      const ethPrice = data.ethereum.usd || 1588; // Fallback to 2000 if API fails
+      const ethPrice = data.ethereum.usd || 1588; // Fallback to 1588 if API fails
       const ethAmount = parseFloat(goalAmount) / ethPrice;
 
       const h3lpAddress = await createCampaign(
         ethers.constants.AddressZero,
         ethers.utils.parseEther(ethAmount.toString()).toString(),
-        signer
+        signer,
+        title,
+        description,
+        code.toUpperCase()
       );
 
       if (h3lpAddress) {
         setSuccess(`H3LP created successfully at ${h3lpAddress}`);
         setTitle("");
         setDescription("");
+        setCode("");
         setGoalAmount("");
       }
     } catch (err) {
@@ -123,9 +136,7 @@ export default function CreatePage() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">H3LP3R</h1>
             <div className="flex items-center space-x-4">
-              <Button onClick={() => (window.location.href = "/")}>
-                H3LP
-              </Button>
+              <Button onClick={() => (window.location.href = "/")}>H3LP</Button>
               {address && context?.user ? (
                 <div className="relative" ref={dropdownRef}>
                   <button
@@ -201,6 +212,7 @@ export default function CreatePage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter H3LP title"
+                    maxLength={100}
                   />
                 </div>
                 <div className="space-y-2">
@@ -210,6 +222,18 @@ export default function CreatePage() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what you need help with"
+                    maxLength={500}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="code">Campaign Code (4 characters)</Label>
+                  <Input
+                    id="code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="Enter 4 character code"
+                    maxLength={4}
+                    className="uppercase"
                   />
                 </div>
                 <div className="space-y-2">
@@ -220,6 +244,8 @@ export default function CreatePage() {
                     value={goalAmount}
                     onChange={(e) => setGoalAmount(e.target.value)}
                     placeholder="Enter goal amount in USD"
+                    min="0.01"
+                    step="0.01"
                   />
                 </div>
                 {error && <div className="text-red-500 text-sm">{error}</div>}

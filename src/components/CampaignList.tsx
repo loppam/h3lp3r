@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/Button";
 import { ethers } from "ethers";
-import { useAccount } from "wagmi";
-import { Campaign, getCampaigns } from "@/lib/contracts";
+import { Campaign, getCampaigns, getCampaignByCode } from "@/lib/contracts";
 import { Progress } from "@/components/ui/progress";
 
 const ITEMS_PER_PAGE = 9;
@@ -26,25 +25,37 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const { address } = useAccount();
 
   useEffect(() => {
-    async function fetchCampaigns() {
+    const loadCampaigns = async () => {
       try {
-        const fetchedCampaigns = await getCampaigns();
-        setCampaigns(fetchedCampaigns);
-        setFilteredCampaigns(fetchedCampaigns);
+        setIsLoading(true);
+        setError(null);
+
+        if (searchQuery.length === 4) {
+          // Search by code
+          const campaign = await getCampaignByCode(searchQuery);
+          if (campaign) {
+            setCampaigns([campaign]);
+          } else {
+            setCampaigns([]);
+          }
+        } else {
+          // Get all campaigns
+          const allCampaigns = await getCampaigns();
+          setCampaigns(allCampaigns);
+        }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch campaigns"
+          err instanceof Error ? err.message : "Failed to load campaigns"
         );
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    fetchCampaigns();
-  }, []);
+    loadCampaigns();
+  }, [searchQuery]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -92,55 +103,51 @@ export function CampaignList({ searchQuery }: CampaignListProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentCampaigns.map((campaign) => (
-          <Card key={campaign.address} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{campaign.title}</CardTitle>
-              <CardDescription>{campaign.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <div className="space-y-2">
-                <div>
-                  <Progress
-                    value={
-                      (Number(campaign.raised) / Number(campaign.goal)) * 100
-                    }
-                    className="h-2"
-                  />
-                  <div className="flex justify-between mt-2">
-                    <span>{ethers.utils.formatEther(campaign.raised)} ETH</span>
-                    <span>{ethers.utils.formatEther(campaign.goal)} ETH</span>
+        {currentCampaigns.map((campaign) => {
+          const goal = parseFloat(ethers.utils.formatEther(campaign.goal));
+          const raised = parseFloat(ethers.utils.formatEther(campaign.raised));
+          const progress = (raised / goal) * 100;
+
+          return (
+            <Card
+              key={campaign.address}
+              className="hover:shadow-lg transition-shadow"
+            >
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>{campaign.title}</span>
+                  <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                    {campaign.code}
+                  </span>
+                </CardTitle>
+                <CardDescription>{campaign.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Progress</span>
+                      <span>{progress.toFixed(1)}%</span>
+                    </div>
+                    <Progress value={progress} />
                   </div>
-                </div>
-                <p>
-                  <span className="font-semibold">Status:</span>{" "}
-                  {campaign.isActive ? "Active" : "Completed"}
-                </p>
-                {campaign.tokenAddress !== ethers.constants.AddressZero && (
-                  <p>
-                    <span className="font-semibold">Token:</span>{" "}
-                    {campaign.tokenAddress.slice(0, 6)}...
-                    {campaign.tokenAddress.slice(-4)}
-                  </p>
-                )}
-              </div>
-              <div className="mt-4 flex justify-between">
-                <Button variant="outline" asChild>
-                  <a
-                    href={`/campaigns/${campaign.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div className="flex justify-between text-sm">
+                    <span>Raised: {raised.toFixed(4)} ETH</span>
+                    <span>Goal: {goal.toFixed(4)} ETH</span>
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() =>
+                      (window.location.href = `/campaign/${campaign.address}`)
+                    }
                   >
-                    View Details
-                  </a>
-                </Button>
-                {address?.toLowerCase() === campaign.creator.toLowerCase() && (
-                  <Button variant="destructive">Withdraw</Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                    View Campaign
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {totalPages > 1 && (

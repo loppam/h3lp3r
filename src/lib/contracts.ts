@@ -4,7 +4,7 @@ import CampaignFactoryJson from "@/contracts/CampaignFactory.json";
 
 // Contract addresses (replace with your deployed addresses)
 export const CONTRACT_ADDRESSES = {
-  factory: "YOUR_FACTORY_ADDRESS",
+  factory: process.env.NEXT_PUBLIC_CAMPAIGN_FACTORY_ADDRESS || "",
 };
 
 // Contract ABIs
@@ -54,6 +54,7 @@ export interface Campaign {
   raised: string;
   isActive: boolean;
   tokenAddress: string;
+  code: string;
 }
 
 function generateCampaignCode(): string {
@@ -67,100 +68,100 @@ function generateCampaignCode(): string {
 
 export async function createCampaign(
   tokenAddress: string,
-  goal: string,
-  signer: ethers.Signer
-): Promise<{ address: string; code: string }> {
+  goalAmount: string,
+  signer: ethers.Signer,
+  title: string,
+  description: string,
+  code?: string
+): Promise<string> {
+  if (!window.ethereum) throw new Error("No Ethereum provider found");
+
   const factory = new ethers.Contract(
     CAMPAIGN_FACTORY_ADDRESS,
     CampaignFactoryJson.abi,
     signer
   );
 
-  const code = generateCampaignCode();
-  const goalWei = ethers.utils.parseEther(goal);
+  // Default duration of 30 days
+  const durationInDays = 30;
+  const campaignCode = code || generateCampaignCode();
 
-  const tx = await factory.createCampaign(tokenAddress, goalWei, code);
+  const tx = await factory.createCampaign(
+    tokenAddress,
+    goalAmount,
+    durationInDays,
+    title,
+    description,
+    campaignCode
+  );
   const receipt = await tx.wait();
 
+  // Get the campaign address from the event
   const event = receipt.events?.find(
     (e: ethers.Event) => e.event === "CampaignCreated"
   );
-  if (!event) throw new Error("Campaign creation failed");
+  if (!event) throw new Error("Campaign creation event not found");
 
-  return {
-    address: event.args.campaign,
-    code,
-  };
+  return event.args.campaignAddress;
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {
   if (!window.ethereum) throw new Error("No Ethereum provider found");
 
-  const provider = new ethers.providers.Web3Provider(
+  const ethereumProvider = new ethers.providers.Web3Provider(
     window.ethereum as ethers.providers.ExternalProvider
   );
   const factory = new ethers.Contract(
     CAMPAIGN_FACTORY_ADDRESS,
     CampaignFactoryJson.abi,
-    provider
+    ethereumProvider
   );
 
   const campaignAddresses = await factory.getAllCampaigns();
 
   // Get details for each campaign
-  const campaigns = await Promise.all(
+  const campaignDetails = await Promise.all(
     campaignAddresses.map(async (address: string) => {
       const campaign = new ethers.Contract(
         address,
         FUND_CAMPAIGN_ABI,
-        provider
+        ethereumProvider
       );
-      const [creator, tokenAddress, goal, raised, isActive] =
-        await campaign.getCampaignDetails();
+      const [
+        creator,
+        tokenAddress,
+        goal,
+        raised,
+        isActive,
+        title,
+        description,
+        code,
+      ] = await campaign.getCampaignDetails();
       return {
         address,
         creator,
-        title: "Campaign", // Default title
-        description: "Help needed", // Default description
+        title,
+        description,
         goal: goal.toString(),
         raised: raised.toString(),
         tokenAddress,
         isActive,
+        code,
       };
     })
   );
 
-  return campaigns;
+  return campaignDetails;
 }
 
 export async function getCampaignByCode(
   code: string
 ): Promise<Campaign | null> {
-  if (!window.ethereum) throw new Error("No Ethereum provider found");
-
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum as ethers.providers.ExternalProvider
-  );
-  const factory = new ethers.Contract(
-    CAMPAIGN_FACTORY_ADDRESS,
-    CampaignFactoryJson.abi,
-    provider
-  );
-
   try {
-    const campaign = await factory.getCampaignByCode(code);
-    return {
-      address: campaign.campaign,
-      creator: campaign.creator,
-      title: campaign.title,
-      description: campaign.description,
-      goal: campaign.goal.toString(),
-      raised: campaign.raised.toString(),
-      tokenAddress: campaign.tokenAddress,
-      isActive: campaign.isActive,
-    };
-  } catch (err) {
-    console.error("Error fetching campaign:", err);
+    const allCampaigns = await getCampaigns();
+    return allCampaigns.find((campaign) => campaign.code === code) || null;
+  } catch (error: unknown) {
+    console.error("Error getting campaign by code:", error);
     return null;
   }
 }

@@ -10,6 +10,7 @@ import { config } from "@/lib/wagmi";
 import { base } from "wagmi/chains";
 import sdk, { type Context } from "@farcaster/frame-sdk";
 import Image from "next/image";
+import "./globals.css";
 
 export default function App() {
   const { address, isConnected } = useAccount();
