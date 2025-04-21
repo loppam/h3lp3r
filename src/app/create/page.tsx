@@ -32,7 +32,6 @@ export default function CreatePage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [code, setCode] = useState("");
   const [goalAmount, setGoalAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,10 +87,15 @@ export default function CreatePage() {
       // Validate inputs
       if (!title.trim()) throw new Error("Title is required");
       if (!description.trim()) throw new Error("Description is required");
-      if (!code.trim() || code.length !== 4)
-        throw new Error("Code must be exactly 4 characters");
       if (!goalAmount || parseFloat(goalAmount) <= 0)
         throw new Error("Goal amount must be greater than 0");
+
+      // Generate random 4-character code
+      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const generatedCode = Array.from(
+        { length: 4 },
+        () => characters[Math.floor(Math.random() * characters.length)]
+      ).join("");
 
       const provider = new ethers.providers.Web3Provider(
         window.ethereum as ethers.providers.ExternalProvider
@@ -112,14 +116,15 @@ export default function CreatePage() {
         signer,
         title,
         description,
-        code.toUpperCase()
+        generatedCode
       );
 
       if (h3lpAddress) {
-        setSuccess(`H3LP created successfully at ${h3lpAddress}`);
+        setSuccess(
+          `H3LP created successfully at ${h3lpAddress} with code: ${generatedCode}`
+        );
         setTitle("");
         setDescription("");
-        setCode("");
         setGoalAmount("");
       }
     } catch (err) {
@@ -223,17 +228,6 @@ export default function CreatePage() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what you need help with"
                     maxLength={500}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="code">Campaign Code (4 characters)</Label>
-                  <Input
-                    id="code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="Enter 4 character code"
-                    maxLength={4}
-                    className="uppercase"
                   />
                 </div>
                 <div className="space-y-2">

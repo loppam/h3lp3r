@@ -12,6 +12,8 @@ contract CampaignFactory is Ownable {
     // Dev wallet address (can be changed later)
     address public constant DEV_WALLET = 0x065eFb8cbD9669648f4d765b6D25304F66419C47;
     
+    constructor() Ownable(msg.sender) {}
+    
     // Array to store all deployed campaigns
     address[] public campaigns;
     
@@ -106,9 +108,10 @@ contract FundCampaign is Pausable {
     uint256 public immutable goalAmount;
     address public immutable devWallet;
     uint256 public immutable deadline;
-    string public immutable title;
-    string public immutable description;
-    string public immutable code;
+    string public title;
+    string public description;
+    string public code;
+    address public immutable factory;
     
     // Campaign state
     uint256 public totalFunds;
@@ -139,6 +142,7 @@ contract FundCampaign is Pausable {
         title = _title;
         description = _description;
         code = _code;
+        factory = msg.sender; // The factory is the one deploying this contract
     }
 
     // Function to fund the campaign
@@ -204,8 +208,7 @@ contract FundCampaign is Pausable {
         }
 
         // Remove campaign from factory
-        CampaignFactory factory = CampaignFactory(owner());
-        factory.removeCampaign(address(this));
+        CampaignFactory(factory).removeCampaign(address(this));
     }
 
     // Function to get campaign details
